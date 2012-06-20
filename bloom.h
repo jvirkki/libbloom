@@ -49,10 +49,7 @@ struct bloom
  *
  * Parameters:
  * -----------
- *     bloom - Pointer to an allocated struct bloom (see above).
- *
- * Parameters:
- * -----------
+ *     bloom   - Pointer to an allocated struct bloom (see above).
  *     entries - The expected number of entries which will be inserted.
  *     error   - Probability of collision (as long as entries are not
  *               exceeded).
