@@ -9,15 +9,15 @@
 #
 # Other build options:
 #
-#   DEBUG=1 make	to build debug instead of optimized
-#   MM=-m64 make	to build 64bit library
+#   DEBUG=1 make        to build debug instead of optimized
+#   MM=-m64 make        to build 64bit library
 #
 # Other build targets:
 #
-#   make test		to build and run test code
-#   make gcov		to build with code coverage and run gcov
-#   make lint		to run lint
-#   make clean		the usual
+#   make test           to build and run test code
+#   make gcov           to build with code coverage and run gcov
+#   make lint           to run lint
+#   make clean          the usual
 #
 
 TOP := $(shell /bin/pwd)
