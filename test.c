@@ -37,6 +37,7 @@ static void basic()
   assert(bloom.ready == 0);
   assert(bloom_add(&bloom, "hello world", 11) == -1);
   assert(bloom_check(&bloom, "hello world", 11) == -1);
+  bloom_free(&bloom);
 
   assert(bloom_init(&bloom, 102, 0.1) == 0);
   assert(bloom.ready == 1);
@@ -49,6 +50,7 @@ static void basic()
   assert(bloom_add(&bloom, "hello", 5) == 0);
   assert(bloom_add(&bloom, "hello", 5) > 0);
   assert(bloom_check(&bloom, "hello", 5) == 1);
+  bloom_free(&bloom);
 }
 
 
@@ -75,6 +77,7 @@ static void add_random(int entries, double error, int count)
     if (bloom_add(&bloom, (void *)block, 32)) { collisions++; }
   }
   (void)close(fd);
+  bloom_free(&bloom);
 
   (void)printf("added %d elements, got %d collisions\n", count, collisions);
 
@@ -116,6 +119,7 @@ static void perf_loop(int entries, int count)
                count, sizeof(int), after - before, collisions);
 
   (void)printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
+  bloom_free(&bloom);
 }
 
 

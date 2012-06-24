@@ -110,4 +110,20 @@ int bloom_add(struct bloom * bloom, const void * buffer, int len);
  */
 void bloom_print(struct bloom * bloom);
 
+
+/** ***************************************************************************
+ * Deallocate internal storage.
+ *
+ * Upon return, the bloom struct is no longer usable. You may call bloom_init
+ * again on the same struct to reinitialize it again.
+ *
+ * Parameters:
+ * -----------
+ *     bloom  - Pointer to an allocated struct bloom (see above).
+ *
+ * Return: none
+ *
+ */
+void bloom_free(struct bloom * bloom);
+
 #endif

@@ -120,3 +120,12 @@ void bloom_print(struct bloom * bloom)
   (void)printf(" ->bytes = %d\n", bloom->bytes);
   (void)printf(" ->hash functions = %d\n", bloom->hashes);
 }
+
+
+void bloom_free(struct bloom * bloom)
+{
+  if (bloom->ready) {
+    free(bloom->bf);
+  }
+  bloom->ready = 0;
+}
