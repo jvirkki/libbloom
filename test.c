@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -115,8 +116,8 @@ static void perf_loop(int entries, int count)
   (void)gettimeofday(&tp, NULL);
   long after = (tp.tv_sec * 1000L) + (tp.tv_usec / 1000L);
 
-  (void)printf("Added %d elements of size %d, took %ldms (collisions=%d)\n",
-               count, sizeof(int), after - before, collisions);
+  (void)printf("Added %d elements of size %d, took %d ms (collisions=%d)\n",
+               count, (int)sizeof(int), (int)(after - before), collisions);
 
   (void)printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
   bloom_free(&bloom);

@@ -26,7 +26,7 @@ BUILD_OS := $(shell uname)
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-CC=gcc ${OPT} ${MM} -std=c99 -fPIC
+CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC
 
 ifeq ($(MM),)
 MM=-m32
@@ -34,10 +34,18 @@ endif
 
 ifeq ($(BUILD_OS),Linux)
 RPATH=-Wl,-rpath,$(BUILD)
+SO=so
 endif
 
 ifeq ($(BUILD_OS),SunOS)
 RPATH=-R$(BUILD)
+SO=so
+endif
+
+ifeq ($(BUILD_OS),Darwin)
+MAC=-install_name $(BUILD)/libbloom.dylib
+RPATH=-Xlinker -rpath -Xlinker $(BUILD)
+SO=dylib
 endif
 
 ifeq ($(DEBUG),1)
@@ -47,12 +55,12 @@ OPT=-O3
 endif
 
 
-all: $(BUILD)/libbloom.so $(BUILD)/test-libbloom
+all: $(BUILD)/libbloom.$(SO) $(BUILD)/test-libbloom
 
-$(BUILD)/libbloom.so: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
-	(cd $(BUILD) && $(CC) bloom.o murmurhash2.o -shared $(LIB) -o libbloom.so)
+$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
+	(cd $(BUILD) && $(CC) bloom.o murmurhash2.o -shared $(LIB) $(MAC) -o libbloom.$(SO))
 
-$(BUILD)/test-libbloom: $(BUILD)/libbloom.so $(BUILD)/test.o
+$(BUILD)/test-libbloom: $(BUILD)/libbloom.$(SO) $(BUILD)/test.o
 	(cd $(BUILD) && $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
 $(BUILD)/%.o: %.c
