@@ -27,7 +27,7 @@ BUILD_OS := $(shell uname)
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC
+CC=gcc -Wall ${OPT} ${MM} -std=c99 -D_GNU_SOURCE -fPIC
 
 #
 # Defines used by the perf_test target (Linux-specific)
