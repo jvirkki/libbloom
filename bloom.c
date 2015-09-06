@@ -22,6 +22,23 @@
 #include "murmurhash2.h"
 
 
+static int test_bit_set_bit(unsigned char * bf, unsigned int x, int set_bit)
+{
+    unsigned int byte = x >> 3;
+    unsigned char c = bf[byte];        // expensive memory access
+    unsigned int mask = 1 << (x % 8);
+
+    if (c & mask)
+        return 1;
+    else
+    {
+        if (set_bit)
+            bf[byte] = c | mask;
+        return 0;
+    }
+}
+
+
 static int bloom_check_add(struct bloom * bloom,
                            const void * buffer, int len, int add)
 {
@@ -35,23 +52,11 @@ static int bloom_check_add(struct bloom * bloom,
   register unsigned int b = murmurhash2(buffer, len, a);
   register unsigned int x;
   register unsigned int i;
-  register unsigned int byte;
-  register unsigned int mask;
-  register unsigned char c;
 
   for (i = 0; i < bloom->hashes; i++) {
     x = (a + i*b) % bloom->bits;
-    byte = x >> 3;
-    c = bloom->bf[byte];        // expensive memory access
-    mask = 1 << (x % 8);
-
-    if (c & mask) {
-      hits++;
-    } else {
-      if (add) {
-        bloom->bf[byte] = c | mask;
-      }
-    }
+    if (test_bit_set_bit(bloom->bf, x, add))
+        hits++;
   }
 
   if (hits == bloom->hashes) {
