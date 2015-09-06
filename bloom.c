@@ -11,6 +11,7 @@
 
 #include <fcntl.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,18 +23,19 @@
 #include "murmurhash2.h"
 
 
-static int test_bit_set_bit(unsigned char * bf, unsigned int x, int set_bit)
+static int test_bit_set_bit(unsigned char * buf, unsigned int x, int set_bit)
 {
-    unsigned int byte = x >> 3;
-    unsigned char c = bf[byte];        // expensive memory access
-    unsigned int mask = 1 << (x % 8);
+    register uint32_t  *word_buf = (uint32_t *) buf;
+    register unsigned int offset = x >> 5;
+    register uint32_t       word = word_buf[offset];
+    register unsigned int   mask = 1 << (x % 32);
 
-    if (c & mask)
+    if (word & mask)
         return 1;
     else
     {
         if (set_bit)
-            bf[byte] = c | mask;
+            word_buf[offset] = word | mask;
         return 0;
     }
 }
