@@ -8,6 +8,17 @@
 #ifndef _BLOOM_H
 #define _BLOOM_H
 
+#define BLOOM_BUCKET_SIZE_FALLBACK (8 * 1024)
+
+/**
+ * It was found that using multiplier x0.5
+ * for CPU L1 cache size is more effective
+ * in terms of CPU usage and, surprisingly, collisions number.
+ *
+ * Feel free to tune this constant the way it will work for you.
+ */
+#define BLOOM_L1_CACHE_SIZE_DIV 1
+
 /** ***************************************************************************
  * Structure to keep track of one bloom filter.  Caller needs to
  * allocate this and pass it to the functions below. First call for
@@ -28,6 +39,12 @@ struct bloom
   // Fields below are private to the implementation. These may go away or
   // change incompatibly at any moment. Client code MUST NOT access or rely
   // on these.
+  unsigned buckets;
+  unsigned bucket_bytes;
+  // x86 CPU divide by/multiply by operation optimization helpers
+  unsigned bucket_bytes_exponent;
+  unsigned bucket_bits_fast_mod_operand;
+
   double bpe;
   unsigned char * bf;
   int ready;
