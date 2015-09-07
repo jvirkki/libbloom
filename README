@@ -18,6 +18,13 @@ for other build options.
 
 The shared library will be in ./build/libbloom.so
 
+Building optional 'perf_test' target assumes the next tools are available:
+- git
+- inxi (inxi -m requires make is run by root to use dmidecode)
+- lscpu
+- perf
+- perl
+
 
 Sample Usage
 ------------
