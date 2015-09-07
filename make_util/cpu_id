@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+
+open LSCPU, "lscpu |" or die;
+while (<LSCPU>)
+{
+  /(.+?):\s+(.+)/;
+  $x{$1} = $2;
+}
+
+print "$x{'Vendor ID'}-$x{'CPU family'}.$x{Model}.$x{Stepping}_$x{'L1d cache'}\n"

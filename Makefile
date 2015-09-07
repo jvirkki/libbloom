@@ -80,6 +80,20 @@ lint:
 test: $(BUILD)/test-libbloom
 	$(BUILD)/test-libbloom
 
+HEAD          = $(shell git log -1 --format="%ci_%s" | perl -pe 's/[^\d\w\n]+/-/g')
+CPU_ID        = $(shell $(TOP)/make_util/cpu_id)
+PERF_TEST_DIR = $(TOP)/perf_test/$(HEAD)/$(CPU_ID)
+
+.PHONY: perf_test
+perf_test: $(BUILD)/test-libbloom
+	mkdir -p $(PERF_TEST_DIR)
+	perf stat $(BUILD)/test-libbloom -p  5000000  5000000 2>&1 | tee $(PERF_TEST_DIR)/test_1.log
+	perf stat $(BUILD)/test-libbloom -p 10000000 10000000 2>&1 | tee $(PERF_TEST_DIR)/test_2.log
+	perf stat $(BUILD)/test-libbloom -p 50000000 50000000 2>&1 | tee $(PERF_TEST_DIR)/test_3.log
+	git format-patch -1 -o $(TOP)/perf_test/$(HEAD)
+	lscpu > ${PERF_TEST_DIR}/lscpu.log
+	inxi -Cm -c0 > ${PERF_TEST_DIR}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR}/inxi.log
+
 gcov:
 	$(MAKE) clean
 	DEBUG=1 DEBUGOPT="-fprofile-arcs -ftest-coverage" $(MAKE) all
