@@ -1,0 +1,28 @@
+testing libbloom...
+----- perf_loop -----
+bloom at 0x7ffc32cb0260
+ ->entries = 5000000
+ ->error = 0.001000
+ ->bits = 71887937
+ ->bits per elem = 14.377588
+ ->bytes = 8985993
+ ->hash functions = 10
+Added 5000000 elements of size 4, took 1131 ms (collisions=571)
+5000000,8985993,1131
+
+ Performance counter stats for '.../test-libbloom -p 5000000 5000000':
+
+       1134,774465      task-clock (msec)         #    0,996 CPUs utilized          
+             1 139      context-switches          #    0,001 M/sec                  
+                 1      cpu-migrations            #    0,001 K/sec                  
+               731      page-faults               #    0,644 K/sec                  
+     3 452 630 950      cycles                    #    3,043 GHz                    
+     2 089 616 943      stalled-cycles-frontend   #   60,52% frontend cycles idle   
+                 0      stalled-cycles-backend    #    0,00% backend  cycles idle   
+     1 664 342 528      instructions              #    0,48  insns per cycle        
+                                                  #    1,26  stalled cycles per insn
+       219 022 779      branches                  #  193,010 M/sec                  
+        16 025 907      branch-misses             #    7,32% of all branches        
+
+       1,139372178 seconds time elapsed
+
