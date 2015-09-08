@@ -1,0 +1,7 @@
+CPU:       Quad core Intel Core i7-3632QM (-HT-MCP-) cache: 6144 KB 
+           clock speeds: max: 3200 MHz 1: 3016 MHz 2: 2817 MHz 3: 2866 MHz
+           4: 2725 MHz 5: 2855 MHz 6: 2916 MHz 7: 2960 MHz 8: 3092 MHz
+Memory:    Array-1 capacity: 16 GB devices: 2 EC: None
+           Device-1: Bottom-Slot 1(top) size: 4 GB speed: 1600 MHz type: DDR3
+           Device-2: Bottom-Slot 2(under) size: 4 GB speed: 1600 MHz
+           type: DDR3
