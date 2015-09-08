@@ -1,0 +1,32 @@
+testing libbloom...
+----- perf_loop -----
+bloom at 0x7ffdcee81f20
+ ->entries = 50000000
+ ->error = 0.001000
+ ->bits = 719060992
+ ->bits per elem = 14.381220
+ ->bytes = 89882624
+ ->buckets = 2743
+ ->bucket_bytes = 32768
+ ->bucket_bytes_exponent = 15
+ ->bucket_bits_fast_mod_operand = 0777777
+ ->hash functions = 10
+Added 50000000 elements of size 4, took 9063 ms (collisions=6191)
+50000000,89882624,9063
+
+ Performance counter stats for '.../test-libbloom -p 50000000 50000000':
+
+       9019,967943      task-clock (msec)         #    0,995 CPUs utilized          
+             9 092      context-switches          #    0,001 M/sec                  
+                 4      cpu-migrations            #    0,000 K/sec                  
+             1 039      page-faults               #    0,115 K/sec                  
+    27 481 256 174      cycles                    #    3,047 GHz                    
+    18 467 901 500      stalled-cycles-frontend   #   67,20% frontend cycles idle   
+                 0      stalled-cycles-backend    #    0,00% backend  cycles idle   
+    15 907 667 558      instructions              #    0,58  insns per cycle        
+                                                  #    1,16  stalled cycles per insn
+     2 175 474 944      branches                  #  241,184 M/sec                  
+       153 241 332      branch-misses             #    7,04% of all branches        
+
+       9,065155409 seconds time elapsed
+
