@@ -1,0 +1,5 @@
+CPU:       Dual core Intel Atom S1260 (-HT-MCP-) cache: 512 KB 
+           clock speeds: max: 2000 MHz 1: 600 MHz 2: 600 MHz 3: 600 MHz
+           4: 2000 MHz
+Memory:    Array-1 capacity: 8 GB devices: 1 EC: Multi-bit ECC
+           Device-1: A1_DIMM0 size: 8 GB speed: 1333 MHz type: DDR3

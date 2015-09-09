@@ -1,0 +1,31 @@
+testing libbloom...
+----- perf_loop -----
+bloom at 0x7fff71b058a0
+ ->entries = 5000000
+ ->error = 0.001000
+ ->bits = 71958528
+ ->bits per elem = 14.391706
+ ->bytes = 8994816
+ ->buckets = 549
+ ->bucket_bytes = 16384
+ ->bucket_bytes_exponent = 14
+ ->bucket_bits_fast_mod_operand = 0377777
+ ->hash functions = 10
+Added 5000000 elements of size 4, took 7632 ms (collisions=598)
+5000000,8994816,7632
+
+ Performance counter stats for '/home/jyri/src/libbloom/build/test-libbloom -p 5000000 5000000':
+
+       7611.266555 task-clock                #    0.997 CPUs utilized          
+               644 context-switches          #    0.000 M/sec                  
+                 2 CPU-migrations            #    0.000 M/sec                  
+             4,581 page-faults               #    0.001 M/sec                  
+    15,117,972,490 cycles                    #    1.986 GHz                     [50.02%]
+   <not supported> stalled-cycles-frontend 
+   <not supported> stalled-cycles-backend  
+     1,533,518,477 instructions              #    0.10  insns per cycle         [75.01%]
+       218,907,380 branches                  #   28.761 M/sec                   [75.00%]
+        32,630,163 branch-misses             #   14.91% of all branches         [74.98%]
+
+       7.636118791 seconds time elapsed
+
