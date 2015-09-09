@@ -33,9 +33,12 @@ CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC
 # Defines used by the perf_test target (Linux-specific)
 #
 HEAD=$(shell git log -1 --format="%h_%f")
+ifndef HOSTNAME
+HOSTNAME=$(shell hostname)
+endif
 PERF_TEST_DIR=$(TOP)/perf_reports
 PERF_TEST_DIR_HEAD=$(PERF_TEST_DIR)/$(HEAD)
-PERF_TEST_DIR_CPU=$(PERF_TEST_DIR_HEAD)/$(CPU_ID)
+PERF_TEST_DIR_CPU=$(PERF_TEST_DIR_HEAD)/$(HOSTNAME)_$(CPU_ID)
 CPU_ID=$(shell $(PERF_TEST_DIR)/cpu_id)
 
 
