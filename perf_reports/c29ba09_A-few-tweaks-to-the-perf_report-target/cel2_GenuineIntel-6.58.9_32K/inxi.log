@@ -1,0 +1,8 @@
+CPU:       Dual core Intel Celeron G1610 (-MCP-) cache: 2048 KB 
+           clock speeds: max: 2599 MHz 1: 2599 MHz 2: 2599 MHz
+Memory:    Array-1 capacity: 32 GB devices: 4 EC: Single-bit ECC
+           Device-1: DIMM_1A size: 2 GB speed: 1333 MHz type: DDR3
+           Device-2: DIMM_2A size: 2 GB speed: 1333 MHz type: DDR3
+           Device-3: DIMM_1B size: 2 GB speed: 1333 MHz type: DDR3
+           Device-4: DIMM_2B size: 2 GB speed: 1333 MHz type: DDR3
+           Device-5: N/A size: 0 MB speed: N/A type: Flash
