@@ -1,0 +1,30 @@
+
+The make target perf_report will run the perf test (from test.c) and
+create some stats organized by current HEAD and CPU type. These are
+useful for comparing changes between commits.
+
+NOTE: Running the perf_report requires the following tools to be available:
+- git
+- inxi
+- lscpu
+- perf
+- perl
+Effectively, this means that the perf reports are Linux-specific.
+
+Note that to generate the full inxi report you need to run it as root
+(inxi -m requires root to use dmidecode). However, this is only needed
+to generate the expected inxi.log file (see below). During regular
+development/testing and/or if you'd rather not run it as root, all the
+tests and reports will work fine as a regular user.
+
+The following files will be generated under ./perf_reports/%h_%f/$CPUID/
+    inxi.log   - System info from inxi
+    lscpu.log  - CPU info from lscpu
+    test_1.log - Test run and perf stats output, 5 million entries
+    test_2.log - Test run and perf stats output, 10 million entries
+    test_3.log - Test run and perf stats output, 50 million entries
+%h = git abbreviated commit tag for most recent commit (see git log)
+%f = git commit title, sanitized (see git log)
+
+In other words, to generate a final report for a given commit you'll
+want to commit the finalized changes and then run perf_report.

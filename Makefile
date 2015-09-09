@@ -1,5 +1,5 @@
 
-# Copyright (c) 2012, Jyri J. Virkki
+# Copyright (c) 2012-2015, Jyri J. Virkki
 # All rights reserved.
 #
 # This file is under BSD license. See LICENSE file.
@@ -18,6 +18,7 @@
 #   make gcov           to build with code coverage and run gcov
 #   make lint           to run lint
 #   make clean          the usual
+#   make perf_report    (Linux only) generate perf reports (see README.perf)
 #
 
 TOP := $(shell /bin/pwd)
@@ -27,6 +28,16 @@ BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
 CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC
+
+#
+# Defines used by the perf_test target (Linux-specific)
+#
+HEAD=$(shell git log -1 --format="%h_%f")
+PERF_TEST_DIR=$(TOP)/perf_reports
+PERF_TEST_DIR_HEAD=$(PERF_TEST_DIR)/$(HEAD)
+PERF_TEST_DIR_CPU=$(PERF_TEST_DIR_HEAD)/$(CPU_ID)
+CPU_ID=$(shell $(PERF_TEST_DIR)/cpu_id)
+
 
 ifeq ($(MM),)
 MM=-m32
@@ -80,19 +91,16 @@ lint:
 test: $(BUILD)/test-libbloom
 	$(BUILD)/test-libbloom
 
-HEAD          = $(shell git log -1 --format="%ci_%s" | perl -pe 's/[^\d\w\n]+/-/g')
-CPU_ID        = $(shell $(TOP)/make_util/cpu_id)
-PERF_TEST_DIR = $(TOP)/perf_test/$(HEAD)/$(CPU_ID)
-
-.PHONY: perf_test
-perf_test: $(BUILD)/test-libbloom
-	mkdir -p $(PERF_TEST_DIR)
-	perf stat $(BUILD)/test-libbloom -p  5000000  5000000 2>&1 | tee $(PERF_TEST_DIR)/test_1.log
-	perf stat $(BUILD)/test-libbloom -p 10000000 10000000 2>&1 | tee $(PERF_TEST_DIR)/test_2.log
-	perf stat $(BUILD)/test-libbloom -p 50000000 50000000 2>&1 | tee $(PERF_TEST_DIR)/test_3.log
-	git format-patch -1 -o $(TOP)/perf_test/$(HEAD)
-	lscpu > ${PERF_TEST_DIR}/lscpu.log
-	inxi -Cm -c0 > ${PERF_TEST_DIR}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR}/inxi.log
+ifeq ($(BUILD_OS),Linux)
+.PHONY: perf_report
+perf_report: $(BUILD)/test-libbloom
+	mkdir -p $(PERF_TEST_DIR_CPU)
+	perf stat --log-fd 1 $(BUILD)/test-libbloom -p  5000000  5000000 | tee $(PERF_TEST_DIR_CPU)/test_1.log
+	perf stat --log-fd 1 $(BUILD)/test-libbloom -p 10000000 10000000 | tee $(PERF_TEST_DIR_CPU)/test_2.log
+	perf stat --log-fd 1 $(BUILD)/test-libbloom -p 50000000 50000000 | tee $(PERF_TEST_DIR_CPU)/test_3.log
+	lscpu > ${PERF_TEST_DIR_CPU}/lscpu.log
+	inxi -Cm -c0 > ${PERF_TEST_DIR_CPU}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR_CPU}/inxi.log
+endif
 
 gcov:
 	$(MAKE) clean
