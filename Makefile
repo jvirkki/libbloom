@@ -4,13 +4,13 @@
 #
 # This file is under BSD license. See LICENSE file.
 #
-# By default, builds optimized 32bit libbloom (under ./build)
+# By default, builds optimized 64bit libbloom (under ./build)
 # Requires GNU Make, so invoke appropriately (make or gmake)
 #
 # Other build options:
 #
 #   DEBUG=1 make        to build debug instead of optimized
-#   MM=-m64 make        to build 64bit library
+#   MM=-m32 make        to build 32bit library
 #
 # Other build targets:
 #
@@ -43,7 +43,7 @@ CPU_ID=$(shell $(PERF_TEST_DIR)/cpu_id)
 
 
 ifeq ($(MM),)
-MM=-m32
+MM=-m64
 endif
 
 ifeq ($(BUILD_OS),Linux)
