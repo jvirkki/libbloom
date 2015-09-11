@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012, Jyri J. Virkki
+ *  Copyright (c) 2012-2015, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -11,13 +11,14 @@
 #define BLOOM_BUCKET_SIZE_FALLBACK (8 * 1024)
 
 /**
- * It was found that using multiplier x0.5
- * for CPU L1 cache size is more effective
- * in terms of CPU usage and, surprisingly, collisions number.
+ * It was found that using multiplier x0.5 for CPU L1 cache size is
+ * more effective in terms of CPU usage and, surprisingly, collisions
+ * number.
  *
  * Feel free to tune this constant the way it will work for you.
  */
 #define BLOOM_L1_CACHE_SIZE_DIV 1
+
 
 /** ***************************************************************************
  * Structure to keep track of one bloom filter.  Caller needs to
@@ -41,6 +42,7 @@ struct bloom
   // on these.
   unsigned buckets;
   unsigned bucket_bytes;
+
   // x86 CPU divide by/multiply by operation optimization helpers
   unsigned bucket_bytes_exponent;
   unsigned bucket_bits_fast_mod_operand;
