@@ -21,6 +21,9 @@
 #include "bloom.h"
 #include "murmurhash2.h"
 
+#define MAKESTRING(n) STRING(n)
+#define STRING(n) #n
+
 
 static int bloom_check_add(struct bloom * bloom,
                            const void * buffer, int len, int add)
@@ -128,4 +131,10 @@ void bloom_free(struct bloom * bloom)
     free(bloom->bf);
   }
   bloom->ready = 0;
+}
+
+
+const char * bloom_version()
+{
+  return MAKESTRING(BLOOM_VERSION);
 }

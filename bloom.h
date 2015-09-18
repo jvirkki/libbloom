@@ -126,4 +126,14 @@ void bloom_print(struct bloom * bloom);
  */
 void bloom_free(struct bloom * bloom);
 
+
+/** ***************************************************************************
+ * Returns version string compiled into library.
+ *
+ * Return: version string
+ *
+ */
+const char * bloom_version();
+
+
 #endif

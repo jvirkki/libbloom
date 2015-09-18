@@ -20,13 +20,15 @@
 #   make clean          the usual
 #
 
+BLOOM_VERSION=1.0
+
 TOP := $(shell /bin/pwd)
 BUILD_OS := $(shell uname)
 
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC
+CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC -DBLOOM_VERSION=$(BLOOM_VERSION)
 
 ifeq ($(MM),)
 MM=-m32
