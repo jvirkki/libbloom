@@ -8,14 +8,25 @@
 #ifndef _BLOOM_H
 #define _BLOOM_H
 
+
+/** ***************************************************************************
+ * On Linux, the code attempts to compute a bucket size based on CPU cache
+ * size info, if available. If that fails for any reason, this fallback size
+ * is used instead.
+ *
+ * On non-Linux systems, this is the bucket size always used.
+ *
+ */
 #define BLOOM_BUCKET_SIZE_FALLBACK (8 * 1024)
 
-/**
+
+/** ***************************************************************************
  * It was found that using multiplier x0.5 for CPU L1 cache size is
  * more effective in terms of CPU usage and, surprisingly, collisions
  * number.
  *
  * Feel free to tune this constant the way it will work for you.
+ *
  */
 #define BLOOM_L1_CACHE_SIZE_DIV 1
 

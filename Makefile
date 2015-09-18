@@ -51,6 +51,8 @@ endif
 ifeq ($(BUILD_OS),Linux)
 RPATH=-Wl,-rpath,$(BUILD)
 SO=so
+LINUX_BO=$(BUILD)/linux.o
+LINUX_O=linux.o
 endif
 
 ifeq ($(BUILD_OS),SunOS)
@@ -73,8 +75,8 @@ endif
 
 all: $(BUILD)/libbloom.$(SO) $(BUILD)/test-libbloom
 
-$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
-	(cd $(BUILD) && $(CC) bloom.o murmurhash2.o -shared $(LIB) $(MAC) -o libbloom.$(SO))
+$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o $(LINUX_BO)
+	(cd $(BUILD) && $(CC) bloom.o murmurhash2.o $(LINUX_O) -shared $(LIB) $(MAC) -o libbloom.$(SO))
 
 $(BUILD)/test-libbloom: $(BUILD)/libbloom.$(SO) $(BUILD)/test.o
 	(cd $(BUILD) && $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
