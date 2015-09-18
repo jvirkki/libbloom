@@ -21,13 +21,15 @@
 #   make perf_report    (Linux only) generate perf reports (see README.perf)
 #
 
+BLOOM_VERSION=1.0
+
 TOP := $(shell /bin/pwd)
 BUILD_OS := $(shell uname)
 
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-CC=gcc -Wall ${OPT} ${MM} -std=c99 -D_GNU_SOURCE -fPIC
+CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC -D_GNU_SOURCE -DBLOOM_VERSION=$(BLOOM_VERSION)
 
 #
 # Defines used by the perf_test target (Linux-specific)
@@ -104,6 +106,9 @@ perf_report: $(BUILD)/test-libbloom
 	lscpu > ${PERF_TEST_DIR_CPU}/lscpu.log
 	inxi -Cm -c0 > ${PERF_TEST_DIR_CPU}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR_CPU}/inxi.log
 endif
+
+vtest: $(BUILD)/test-libbloom
+	valgrind --tool=memcheck --leak-check=full $(BUILD)/test-libbloom
 
 gcov:
 	$(MAKE) clean

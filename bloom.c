@@ -23,6 +23,9 @@
 #include "bloom.h"
 #include "murmurhash2.h"
 
+#define MAKESTRING(n) STRING(n)
+#define STRING(n) #n
+
 
 static int test_bit_set_bit(unsigned char * buf, unsigned int x, int set_bit)
 {
@@ -276,4 +279,10 @@ void bloom_free(struct bloom * bloom)
     free(bloom->bf);
   }
   bloom->ready = 0;
+}
+
+
+const char * bloom_version()
+{
+  return MAKESTRING(BLOOM_VERSION);
 }

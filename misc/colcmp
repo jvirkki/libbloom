@@ -1,0 +1,51 @@
+#!/usr/bin/env perl
+
+#
+# Copyright (c) 2015, Jyri J. Virkki
+# All rights reserved.
+#
+# This file is under BSD license. See LICENSE file.
+#
+
+#
+# ./colcmp FILE1 FILE2
+#
+# Compare two collision average runs (generated with colgraph).
+# The runs must be for the same SIZE (see colgraph).
+#
+# Requires ploticus to generate the graph.
+#
+
+$file1 = shift(@ARGV);
+$file2 = shift(@ARGV);
+
+if (! -e $file1 || ! -e $file2) {
+    die "File not found\n";
+}
+
+open(F1, $file1);
+open(F2, $file2);
+open(OUT, ">data.cmp");
+
+while(<F1>) {
+    ($count1, $avg1) = /(\d+), (\S+)/;
+    $_ = <F2>;
+    ($count2, $avg2) = /(\d+), (\S+)/;
+    if ($count1 ne $count2) {
+        die "mismatch $count1 $count2\n";
+    }
+    print OUT "$count2 $avg1 $avg2\n";
+}
+
+close(F1);
+close(F2);
+close(OUT);
+
+$cmd = "ploticus -prefab lines data=data.cmp x=1 y=2 y2=3 " .
+    "\"xrange=0 $count2\" \"title=size = $count2\" " .
+    "\"ylbl=collisions\" \"xlbl=count\" \"name=$file1\" " .
+    "\"name2=$file2\" ";
+print "$cmd\n";
+system($cmd);
+
+unlink "data.cmp";
