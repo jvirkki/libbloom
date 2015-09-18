@@ -82,6 +82,9 @@ lint:
 test: $(BUILD)/test-libbloom
 	$(BUILD)/test-libbloom
 
+vtest: $(BUILD)/test-libbloom
+	valgrind --tool=memcheck --leak-check=full $(BUILD)/test-libbloom
+
 gcov:
 	$(MAKE) clean
 	DEBUG=1 DEBUGOPT="-fprofile-arcs -ftest-coverage" $(MAKE) all
