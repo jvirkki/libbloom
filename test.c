@@ -80,13 +80,7 @@ static void add_random(int entries, double error, int count)
   (void)close(fd);
   bloom_free(&bloom);
 
-  (void)printf("added %d elements, got %d collisions\n", count, collisions);
-
-  if (count <= entries) {
-    assert(collisions <= (entries * error));
-  } else if (count <= entries * 2) {
-    assert(collisions < (2 * entries * error));
-  }
+  (void)printf("added %d, collisions %d\n", count, collisions);
 }
 
 
@@ -127,6 +121,18 @@ static void perf_loop(int entries, int count)
 /** ***************************************************************************
  * main...
  *
+ * To test performance only, run with options:  -p ENTRIES COUNT
+ * Where 'ENTRIES' is the expected number of entries used to initialize the
+ * bloom filter and 'COUNT' is the actual number of entries inserted.
+ *
+ * To test collisions, run with options: -c ENTRIES ERROR COUNT
+ * Where 'ENTRIES' is the expected number of entries used to initialize the
+ * bloom filter and 'ERROR' is the acceptable probability of collision
+ * used to initialize the bloom filter. 'COUNT' is the actual number of
+ * entries inserted.
+ *
+ * With no options, it runs various tests.
+ *
  */
 int main(int argc, char **argv)
 {
@@ -134,6 +140,11 @@ int main(int argc, char **argv)
 
   if (argc == 4 && !strncmp(argv[1], "-p", 2)) {
     perf_loop(atoi(argv[2]), atoi(argv[3]));
+    exit(0);
+  }
+
+  if (argc == 5 && !strncmp(argv[1], "-c", 2)) {
+    add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]));
     exit(0);
   }
 
@@ -146,4 +157,6 @@ int main(int argc, char **argv)
   }
 
   perf_loop(10000000, 10000000);
+
+  printf("\nBrought to you by libbloom-%s\n", bloom_version());
 }
