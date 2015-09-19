@@ -21,7 +21,7 @@
 #   make perf_report    (Linux only) generate perf reports (see README.perf)
 #
 
-BLOOM_VERSION=1.1
+BLOOM_VERSION=1.2
 
 TOP := $(shell /bin/pwd)
 BUILD_OS := $(shell uname)
