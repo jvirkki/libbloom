@@ -60,12 +60,14 @@ static void basic()
  * into it to see if collission rates are within expectations.
  *
  */
-static void add_random(int entries, double error, int count)
+static void add_random(int entries, double error, int count,
+                       unsigned int cache_size)
 {
-  (void)printf("----- add_random(%d, %f, %d) -----\n", entries, error, count);
+  (void)printf("----- add_random(%d, %f, %d, %d) -----\n",
+               entries, error, count, cache_size);
 
   struct bloom bloom;
-  assert(bloom_init(&bloom, entries, error) == 0);
+  assert(bloom_init_size(&bloom, entries, error, cache_size) == 0);
   bloom_print(&bloom);
 
   char block[32];
@@ -125,13 +127,14 @@ static void perf_loop(int entries, int count)
  * Where 'ENTRIES' is the expected number of entries used to initialize the
  * bloom filter and 'COUNT' is the actual number of entries inserted.
  *
- * To test collisions, run with options: -c ENTRIES ERROR COUNT
+ * To test collisions, run with options: -c ENTRIES ERROR COUNT [CACHE_SIZE]
  * Where 'ENTRIES' is the expected number of entries used to initialize the
  * bloom filter and 'ERROR' is the acceptable probability of collision
  * used to initialize the bloom filter. 'COUNT' is the actual number of
- * entries inserted.
+ * entries inserted. If the optional CACHE_SIZE argument is given, it is
+ * used to initialize the bloom filter (see bloom_init_size()).
  *
- * With no options, it runs various tests.
+ * With no options, it runs various default tests.
  *
  */
 int main(int argc, char **argv)
@@ -143,17 +146,26 @@ int main(int argc, char **argv)
     exit(0);
   }
 
-  if (argc == 5 && !strncmp(argv[1], "-c", 2)) {
-    add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]));
+  if (!strncmp(argv[1], "-c", 2)) {
+    switch (argc) {
+    case 5:
+      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0);
+      break;
+    case 6:
+      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]));
+      break;
+    default:
+      printf("-c ENTRIES ERROR COUNT [CACHE_SIZE]\n");
+    }
     exit(0);
   }
 
   basic();
-  add_random(100, 0.001, 300);
+  add_random(100, 0.001, 300, 0);
 
   int i;
   for (i = 0; i < 10; i++) {
-    add_random(1000000, 0.001, 1000000);
+    add_random(1000000, 0.001, 1000000, 0);
   }
 
   perf_loop(10000000, 10000000);

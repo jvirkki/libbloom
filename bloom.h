@@ -94,6 +94,21 @@ int bloom_init(struct bloom * bloom, int entries, double error);
 
 
 /** ***************************************************************************
+ * Initialize the bloom filter for use.
+ *
+ * See comments above for general information.
+ *
+ * This is the same as bloom_init() but allows the caller to pass in a
+ * cache_size to override the internal value (which is either computed
+ * or the default of BLOOM_BUCKET_SIZE_FALLBACK). Mostly useful for
+ * experimenting.
+ *
+ */
+int bloom_init_size(struct bloom * bloom, int entries, double error,
+                    unsigned int cache_size);
+
+
+/** ***************************************************************************
  * Check if the given element is in the bloom filter. Remember this may
  * return false positive if a collision occured.
  *

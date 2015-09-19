@@ -83,15 +83,18 @@ static int bloom_check_add(struct bloom * bloom,
 }
 
 
-static void setup_buckets(struct bloom * bloom)
+static void setup_buckets(struct bloom * bloom, unsigned int cache_size)
 {
-  unsigned cache_size;
+  // If caller passed a non-zero cache_size, use it as given, otherwise
+  // either compute it or use built-in default
 
+  if (cache_size == 0) {
 #ifdef __linux__
-  cache_size = detect_bucket_size(BLOOM_BUCKET_SIZE_FALLBACK);
+    cache_size = detect_bucket_size(BLOOM_BUCKET_SIZE_FALLBACK);
 #else
-  cache_size = BLOOM_BUCKET_SIZE_FALLBACK;
+    cache_size = BLOOM_BUCKET_SIZE_FALLBACK;
 #endif
+  }
 
   bloom->buckets = (bloom->bytes / cache_size);
   bloom->bucket_bytes = cache_size;
@@ -119,7 +122,8 @@ static void setup_buckets(struct bloom * bloom)
 }
 
 
-int bloom_init(struct bloom * bloom, int entries, double error)
+int bloom_init_size(struct bloom * bloom, int entries, double error,
+                    unsigned int cache_size)
 {
   bloom->ready = 0;
 
@@ -145,7 +149,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
   bloom->hashes = (int)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
 
-  setup_buckets(bloom);
+  setup_buckets(bloom, cache_size);
 
   bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
   if (bloom->bf == NULL) {
@@ -154,6 +158,12 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
   bloom->ready = 1;
   return 0;
+}
+
+
+int bloom_init(struct bloom * bloom, int entries, double error)
+{
+  return bloom_init_size(bloom, entries, error, 0);
 }
 
 
