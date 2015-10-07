@@ -103,6 +103,9 @@ int bloom_init(struct bloom * bloom, int entries, double error);
  * or the default of BLOOM_BUCKET_SIZE_FALLBACK). Mostly useful for
  * experimenting.
  *
+ * See misc/bucketsize for a script which can help identify a good value
+ * for cache_size.
+ *
  */
 int bloom_init_size(struct bloom * bloom, int entries, double error,
                     unsigned int cache_size);

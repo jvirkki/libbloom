@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+
+#
+# Copyright (c) 2015, Jyri J. Virkki
+# All rights reserved.
+#
+# This file is under BSD license. See LICENSE file.
+#
+
+#
+# ./bucketsize SIZE ERROR
+#
+# SIZE = size of bloom library to initialize
+# ERROR = expected error
+#
+# This script runs a random collision test (test-libbloom -c) $rounds
+# number of times, varying the bucket size used to initialize the
+# bloom filter. If you have a known data set of a given size, this may
+# help find a better bucket size than the default.
+#
+# If ploticus is available it'll also display a graph. Or you can use
+# any other graphing app or tool to process the 'data' file.
+#
+
+use Time::HiRes qw(time);
+
+$rounds = 5;
+
+$max_bucket = 2 ** 18;
+$bucket_inc = 2048;
+$min_bucket = $bucket_inc;
+
+$size = shift(@ARGV);
+if (!$size) {
+    die "provide a size\n";
+}
+
+$error = shift(@ARGV);
+if (!$error) {
+    die "provide expected error\n";
+}
+
+$least_coll = $size;
+
+open(OUT, ">data");
+for ($bucket = $min_bucket; $bucket <= $max_bucket; $bucket += $bucket_inc) {
+
+    $avg = 0;
+    $total_time = 0;
+
+    for ($n = 0; $n < $rounds; $n++) {
+        $time0 = time;
+        open(RES, "../build/test-libbloom -c $size $error $size $bucket |");
+        while(<RES>) {$got = $_;}
+        close(RES);
+        $took_time = time - $time0;
+        $total_time += $took_time;
+        ($added, $coll) = $got =~ /added (\d+), collisions (\d+)/;
+        $avg += $coll;
+    }
+    $avg /= $rounds;
+    $avg_time = $total_time / $rounds;
+
+    print "With bucket_size $bucket, avg.coll = $avg, avg.time=$avg_time\n";
+    print OUT "$bucket, $avg, $avg_time\n";
+
+    if ($avg < $least_coll) {
+        $best_bucket = $bucket;
+        $least_coll = $avg;
+    }
+}
+close(OUT);
+
+print "Least collisions ($least_coll) seen with bucket size $best_bucket\n";
+
+$cmd = "ploticus -prefab lines data=data x=1 y=2 \"xrange=0 $max_bucket\" " .
+    "\"title=size = $size\" \"ylbl=collisions\" \"xlbl=bucket size\" ";
+print "$cmd\n";
+system($cmd);
