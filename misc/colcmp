@@ -8,44 +8,92 @@
 #
 
 #
-# ./colcmp FILE1 FILE2
+# ./colcmp FILE1 [FILEn*]
 #
-# Compare two collision average runs (generated with colgraph).
+# Graph one or more collision average runs (generated with colgraph).
 # The runs must be for the same SIZE (see colgraph).
 #
-# Requires ploticus to generate the graph.
+# Requires ploticus to generate the graph. Note that the lines prefab
+# only supports four data sets so in practice that is the limit,
+# even though this script will process any number of input file.
+#
+# (To plot more than four, you could load the generated 'data.cmp'
+# file into an alternate graphing tool or spreadsheet instead of
+# relying on ploticus.)
 #
 
-$file1 = shift(@ARGV);
-$file2 = shift(@ARGV);
-
-if (! -e $file1 || ! -e $file2) {
-    die "File not found\n";
+$sets = 0;
+while (@ARGV) {
+    $files[$sets] = shift(@ARGV);
+    if (! -e $files[$sets]) {
+        die "$files[$sets] does not exist!\n";
+    }
+    $sets++;
 }
 
-open(F1, $file1);
-open(F2, $file2);
+if ($sets < 1) {
+    die "Need at least some data!\n";
+}
+
+for ($n = 0; $n < $sets; $n++) {
+    local *FILE;
+    open(FILE, $files[$n]);
+    $fh[$n] = *FILE;
+}
+
 open(OUT, ">data.cmp");
 
-while(<F1>) {
-    ($count1, $avg1) = /(\d+), (\S+)/;
-    $_ = <F2>;
-    ($count2, $avg2) = /(\d+), (\S+)/;
-    if ($count1 ne $count2) {
-        die "mismatch $count1 $count2\n";
+# Read one line at a time from each input file.
+# All files must be comparable, meaning the count column
+# for each line must be the same, else give up.
+
+$points = 0;
+
+while(readline $fh[0]) {
+    chomp;
+    ($count, $avg[0]) = /(\d+), (\S+)/;
+
+    for ($n = 1; $n < $sets; $n++) {
+        $_ = readline $fh[$n]; chomp;
+        ($nc, $avg[$n]) = /(\d+), (\S+)/;
+        if ($nc ne $count) {
+            die "Mismatch in file $files[$n]: $nc instead of $count\n";
+        }
     }
-    print OUT "$count2 $avg1 $avg2\n";
+
+    print OUT $count;
+    for ($n = 0; $n < $sets; $n++) {
+        print OUT " $avg[$n]";
+    }
+    print OUT "\n";
+
+    $points++;
 }
 
-close(F1);
-close(F2);
+# Close all files...
+for ($n = 0; $n < $sets; $n++) {
+    close($fh[$n]);
+}
 close(OUT);
 
-$cmd = "ploticus -prefab lines data=data.cmp x=1 y=2 y2=3 " .
-    "\"xrange=0 $count2\" \"title=size = $count2\" " .
-    "\"ylbl=collisions\" \"xlbl=count\" \"name=$file1\" " .
-    "\"name2=$file2\" ";
+if (!$points) {
+    die "Nothing to show!\n";
+}
+
+$cmd = "ploticus -prefab lines data=data.cmp " .
+    " \"xrange=0 $count\" " .
+    " \"title=size = $count\" " .
+    "\"ylbl=collisions\" \"xlbl=count\" " .
+    "x=1 y=2 ";
+
+for ($n = 1; $n < $sets; $n++) {
+    $cmd .= " y" . ($n+1) . "=" . ($n+2);
+}
+
+$cmd .= " \"name=$files[0]\" ";
+for ($n = 1; $n < $sets; $n++) {
+    $cmd .= " \"name" . ($n+1) . "=$files[$n]\" ";
+}
+
 print "$cmd\n";
 system($cmd);
-
-unlink "data.cmp";
