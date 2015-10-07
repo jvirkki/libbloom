@@ -18,7 +18,7 @@
 #   make gcov           to build with code coverage and run gcov
 #   make lint           to run lint
 #   make clean          the usual
-#   make perf_report    (Linux only) generate perf reports (see README.perf)
+#   make perf_report    generate perf reports (see README.perf)
 #
 
 BLOOM_VERSION=1.2
@@ -32,7 +32,7 @@ LIB=-lm
 CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC -D_GNU_SOURCE -DBLOOM_VERSION=$(BLOOM_VERSION)
 
 #
-# Defines used by the perf_test target (Linux-specific)
+# Defines used by the perf_test target
 #
 HEAD=$(shell git log -1 --format="%h_%f")
 ifndef HOSTNAME
@@ -53,6 +53,7 @@ RPATH=-Wl,-rpath,$(BUILD)
 SO=so
 LINUX_BO=$(BUILD)/linux.o
 LINUX_O=linux.o
+PERF_STAT=perf stat --log-fd 1
 endif
 
 ifeq ($(BUILD_OS),SunOS)
@@ -98,13 +99,14 @@ lint:
 test: $(BUILD)/test-libbloom
 	$(BUILD)/test-libbloom
 
-ifeq ($(BUILD_OS),Linux)
+
 .PHONY: perf_report
 perf_report: $(BUILD)/test-libbloom
 	mkdir -p $(PERF_TEST_DIR_CPU)
-	perf stat --log-fd 1 $(BUILD)/test-libbloom -p  5000000  5000000 | tee $(PERF_TEST_DIR_CPU)/test_1.log
-	perf stat --log-fd 1 $(BUILD)/test-libbloom -p 10000000 10000000 | tee $(PERF_TEST_DIR_CPU)/test_2.log
-	perf stat --log-fd 1 $(BUILD)/test-libbloom -p 50000000 50000000 | tee $(PERF_TEST_DIR_CPU)/test_3.log
+	$(PERF_STAT) $(BUILD)/test-libbloom -p  5000000  5000000 | tee $(PERF_TEST_DIR_CPU)/test_1.log
+	$(PERF_STAT) $(BUILD)/test-libbloom -p 10000000 10000000 | tee $(PERF_TEST_DIR_CPU)/test_2.log
+	$(PERF_STAT) $(BUILD)/test-libbloom -p 50000000 50000000 | tee $(PERF_TEST_DIR_CPU)/test_3.log
+ifeq ($(BUILD_OS),Linux)
 	lscpu > ${PERF_TEST_DIR_CPU}/lscpu.log
 	inxi -Cm -c0 > ${PERF_TEST_DIR_CPU}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR_CPU}/inxi.log
 endif
