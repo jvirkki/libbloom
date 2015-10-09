@@ -14,10 +14,11 @@
  * size info, if available. If that fails for any reason, this fallback size
  * is used instead.
  *
- * On non-Linux systems, this is the bucket size always used.
+ * On non-Linux systems, this is the bucket size always used unless the
+ * caller overrides it (see bloom_init_size()).
  *
  */
-#define BLOOM_BUCKET_SIZE_FALLBACK (8 * 1024)
+#define BLOOM_BUCKET_SIZE_FALLBACK (32 * 1024)
 
 
 /** ***************************************************************************
