@@ -8,6 +8,10 @@
 #ifndef _BLOOM_H
 #define _BLOOM_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /** ***************************************************************************
  * On Linux, the code attempts to compute a bucket size based on CPU cache
@@ -184,5 +188,8 @@ void bloom_free(struct bloom * bloom);
  */
 const char * bloom_version();
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif
