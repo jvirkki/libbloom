@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012, Jyri J. Virkki
+ *  Copyright (c) 2012-2016, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -61,14 +61,17 @@ static void basic()
  *
  */
 static void add_random(int entries, double error, int count,
-                       unsigned int cache_size)
+                       unsigned int cache_size, int quiet,
+                       int check_error)
 {
-  (void)printf("----- add_random(%d, %f, %d, %d) -----\n",
-               entries, error, count, cache_size);
+  if (!quiet) {
+    (void)printf("----- add_random(%d, %f, %d, %d) -----\n",
+                 entries, error, count, cache_size);
+  }
 
   struct bloom bloom;
   assert(bloom_init_size(&bloom, entries, error, cache_size) == 0);
-  bloom_print(&bloom);
+  if (!quiet) { bloom_print(&bloom); }
 
   char block[32];
   int collisions = 0;
@@ -80,9 +83,23 @@ static void add_random(int entries, double error, int count,
     if (bloom_add(&bloom, (void *)block, 32)) { collisions++; }
   }
   (void)close(fd);
-  bloom_free(&bloom);
 
-  (void)printf("added %d, collisions %d\n", count, collisions);
+  double er = (double)collisions / (double)count;
+
+  if (!quiet) {
+    printf("entries: %d, error: %f, count: %d, coll: %d, error: %f, bytes: %d\n",
+           entries, error, count, collisions, er, bloom.bytes);
+  } else {
+    printf("%d %f %d %d %f %d\n",
+           entries, error, count, collisions, er, bloom.bytes);
+  }
+
+  if (check_error && er > error) {
+    printf("error: expected error %f but observed collision rate %f\n", error, er);
+    exit(1);
+  }
+
+  bloom_free(&bloom);
 }
 
 
@@ -116,6 +133,8 @@ static void perf_loop(int entries, int count)
                count, (int)sizeof(int), (int)(after - before), collisions);
 
   (void)printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
+
+  bloom_print(&bloom);
   bloom_free(&bloom);
 }
 
@@ -134,6 +153,8 @@ static void perf_loop(int entries, int count)
  * entries inserted. If the optional CACHE_SIZE argument is given, it is
  * used to initialize the bloom filter (see bloom_init_size()).
  *
+ * To test collisions over a range of sizes: -G START END INCREMENT ERROR
+ *
  * With no options, it runs various default tests.
  *
  */
@@ -141,18 +162,26 @@ int main(int argc, char **argv)
 {
   (void)printf("testing libbloom...\n");
 
+  if (argc == 6 && !strncmp(argv[1], "-G", 2)) {
+    int e;
+    for (e = atoi(argv[2]); e < atoi(argv[3]); e+= atoi(argv[4])) {
+      add_random(e, atof(argv[5]), e, 0, 1, 0);
+    }
+    exit(0);
+  }
+
   if (argc == 4 && !strncmp(argv[1], "-p", 2)) {
     perf_loop(atoi(argv[2]), atoi(argv[3]));
     exit(0);
   }
 
-  if (!strncmp(argv[1], "-c", 2)) {
+  if (argc > 4 && !strncmp(argv[1], "-c", 2)) {
     switch (argc) {
     case 5:
-      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0);
+      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0, 0, 1);
       break;
     case 6:
-      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]));
+      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]), 0, 1);
       break;
     default:
       printf("-c ENTRIES ERROR COUNT [CACHE_SIZE]\n");
@@ -161,11 +190,11 @@ int main(int argc, char **argv)
   }
 
   basic();
-  add_random(100, 0.001, 300, 0);
+  add_random(100, 0.001, 300, 0, 0, 0);
 
   int i;
   for (i = 0; i < 10; i++) {
-    add_random(1000000, 0.001, 1000000, 0);
+    add_random(1000000, 0.001, 1000000, 0, 0, 1);
   }
 
   perf_loop(10000000, 10000000);

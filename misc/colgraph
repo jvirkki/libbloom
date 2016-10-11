@@ -43,7 +43,7 @@ for ($tenth = 1; $tenth < 11; $tenth++) {
         open(RES, "../build/test-libbloom -c $size $error $count |");
         while(<RES>) {$got = $_;}
         close(RES);
-        ($added, $coll) = $got =~ /added (\d+), collisions (\d+)/;
+        ($added, $coll) = $got =~ /count: (\d+), coll: (\d+)/;
         $avg += $coll;
     }
     $avg /= $rounds;
