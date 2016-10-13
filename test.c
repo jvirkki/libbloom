@@ -160,11 +160,9 @@ static void perf_loop(int entries, int count)
  */
 int main(int argc, char **argv)
 {
-  (void)printf("testing libbloom...\n");
-
   if (argc == 6 && !strncmp(argv[1], "-G", 2)) {
     int e;
-    for (e = atoi(argv[2]); e < atoi(argv[3]); e+= atoi(argv[4])) {
+    for (e = atoi(argv[2]); e <= atoi(argv[3]); e+= atoi(argv[4])) {
       add_random(e, atof(argv[5]), e, 0, 1, 0);
     }
     exit(0);
