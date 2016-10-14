@@ -51,8 +51,6 @@ endif
 ifeq ($(BUILD_OS),Linux)
 RPATH=-Wl,-rpath,$(BUILD)
 SO=so
-LINUX_BO=$(BUILD)/linux.o
-LINUX_O=linux.o
 PERF_STAT=perf stat --log-fd 1
 endif
 
