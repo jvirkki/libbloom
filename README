@@ -13,7 +13,7 @@ Building
 The Makefile assumes GNU Make, so run 'make' or 'gmake' as appropriate
 on your system.
 
-By default it builds an optimized 32bit libbloom. See Makefile comments
+By default it builds an optimized 64 bit libbloom. See Makefile comments
 for other build options.
 
 The shared library will be in ./build/libbloom.so
