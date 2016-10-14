@@ -69,17 +69,7 @@ int bloom_init(struct bloom * bloom, int entries, double error);
 
 
 /** ***************************************************************************
- * Initialize the bloom filter for use.
- *
- * See comments above for general information.
- *
- * This is the same as bloom_init() but allows the caller to pass in a
- * cache_size to override the internal value (which is either computed
- * or the default of BLOOM_BUCKET_SIZE_FALLBACK). Mostly useful for
- * experimenting.
- *
- * See misc/bucketsize for a script which can help identify a good value
- * for cache_size.
+ * Deprecated, use bloom_init()
  *
  */
 int bloom_init_size(struct bloom * bloom, int entries, double error,

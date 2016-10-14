@@ -61,16 +61,15 @@ static void basic()
  *
  */
 static void add_random(int entries, double error, int count,
-                       unsigned int cache_size, int quiet,
-                       int check_error)
+                       int quiet, int check_error)
 {
   if (!quiet) {
-    (void)printf("----- add_random(%d, %f, %d, %d) -----\n",
-                 entries, error, count, cache_size);
+    (void)printf("----- add_random(%d, %f, %d, %d, %d) -----\n",
+                 entries, error, count, quiet, check_error);
   }
 
   struct bloom bloom;
-  assert(bloom_init_size(&bloom, entries, error, cache_size) == 0);
+  assert(bloom_init(&bloom, entries, error) == 0);
   if (!quiet) { bloom_print(&bloom); }
 
   char block[32];
@@ -87,7 +86,8 @@ static void add_random(int entries, double error, int count,
   double er = (double)collisions / (double)count;
 
   if (!quiet) {
-    printf("entries: %d, error: %f, count: %d, coll: %d, error: %f, bytes: %d\n",
+    printf("entries: %d, error: %f, count: %d, coll: %d, error: %f, "
+           "bytes: %d\n",
            entries, error, count, collisions, er, bloom.bytes);
   } else {
     printf("%d %f %d %d %f %d\n",
@@ -95,7 +95,7 @@ static void add_random(int entries, double error, int count,
   }
 
   if (check_error && er > error) {
-    printf("error: expected error %f but observed collision rate %f\n", error, er);
+    printf("error: expected error %f but observed %f\n", error, er);
     exit(1);
   }
 
@@ -146,12 +146,11 @@ static void perf_loop(int entries, int count)
  * Where 'ENTRIES' is the expected number of entries used to initialize the
  * bloom filter and 'COUNT' is the actual number of entries inserted.
  *
- * To test collisions, run with options: -c ENTRIES ERROR COUNT [CACHE_SIZE]
+ * To test collisions, run with options: -c ENTRIES ERROR COUNT
  * Where 'ENTRIES' is the expected number of entries used to initialize the
  * bloom filter and 'ERROR' is the acceptable probability of collision
  * used to initialize the bloom filter. 'COUNT' is the actual number of
- * entries inserted. If the optional CACHE_SIZE argument is given, it is
- * used to initialize the bloom filter (see bloom_init_size()).
+ * entries inserted.
  *
  * To test collisions over a range of sizes: -G START END INCREMENT ERROR
  *
@@ -163,7 +162,7 @@ int main(int argc, char **argv)
   if (argc == 6 && !strncmp(argv[1], "-G", 2)) {
     int e;
     for (e = atoi(argv[2]); e <= atoi(argv[3]); e+= atoi(argv[4])) {
-      add_random(e, atof(argv[5]), e, 0, 1, 0);
+      add_random(e, atof(argv[5]), e, 1, 0);
     }
     exit(0);
   }
@@ -176,23 +175,20 @@ int main(int argc, char **argv)
   if (argc > 4 && !strncmp(argv[1], "-c", 2)) {
     switch (argc) {
     case 5:
-      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0, 0, 1);
-      break;
-    case 6:
-      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), atoi(argv[5]), 0, 1);
+      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0, 1);
       break;
     default:
-      printf("-c ENTRIES ERROR COUNT [CACHE_SIZE]\n");
+      printf("-c ENTRIES ERROR COUNT\n");
     }
     exit(0);
   }
 
   basic();
-  add_random(100, 0.001, 300, 0, 0, 0);
+  add_random(100, 0.001, 300, 0, 0);
 
   int i;
   for (i = 0; i < 10; i++) {
-    add_random(1000000, 0.001, 1000000, 0, 0, 1);
+    add_random(1000000, 0.001, 1000000, 0, 1);
   }
 
   perf_loop(10000000, 10000000);
