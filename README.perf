@@ -32,34 +32,6 @@ Short summary of recorded runs below (see perf_reports directory for
 full details). The table shows elapsed time (seconds) for each of the
 three tests.
 
-na_GenuineIntel-6.58.9_32K Quad core Intel Core i7-3632QM
-----------------------------------------------------------------------
-                test_1  test_2  test_3
-v1.0               1.1     2.6    13.8
-b9dc070            1.2     2.6    13.8
-cb68f60            1.1     2.7    14.0
-c558523            0.8     1.7     9.1
-
-
-cel2_GenuineIntel-6.58.9_32K Dual core Intel Celeron G1610
-----------------------------------------------------------------------
-                test_1  test_2  test_3
-v1.0               1.4     3.0    16.2
-b9dc070            1.4     3.0    16.1
-cb68f60            1.4     3.0    16.0
-c558523            0.9     1.8     9.6
-v1.1               0.9     1.8     9.6
-
-
-na_GenuineIntel-6.55.8_24K Quad core Intel Pentium CPU N3530
-----------------------------------------------------------------------
-                test_1  test_2  test_3
-v1.0               5.8    11.9    63.2
-b9dc070            7.0    14.6    77.1
-cb68f60            6.5    13.2    69.0
-c558523            3.7     7.6    38.7
-
-
 boq_GenuineIntel-6.54.9_24K Dual core Intel Atom S1260
 ----------------------------------------------------------------------
                 test_1  test_2  test_3
