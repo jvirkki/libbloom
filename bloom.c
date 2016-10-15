@@ -26,12 +26,9 @@
 #define MAKESTRING(n) STRING(n)
 #define STRING(n) #n
 
-#ifdef __linux__
-unsigned detect_bucket_size(unsigned fallback_size);
-#endif
 
-
-static int test_bit_set_bit(unsigned char * buf, unsigned int x, int set_bit)
+inline static int test_bit_set_bit(unsigned char * buf,
+                                   unsigned int x, int set_bit)
 {
   register uint32_t * word_buf = (uint32_t *)buf;
   register unsigned int offset = x >> 5;

@@ -72,13 +72,22 @@ OPT=-O3
 endif
 
 
-all: $(BUILD)/libbloom.$(SO) $(BUILD)/test-libbloom
+all: $(BUILD)/libbloom.$(SO) $(BUILD)/libbloom.a
 
-$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o $(LINUX_BO)
-	(cd $(BUILD) && $(CC) bloom.o murmurhash2.o $(LINUX_O) -shared $(LIB) $(MAC) -o libbloom.$(SO))
+$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
+	(cd $(BUILD) && \
+	    $(CC) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
+	    -o libbloom.$(SO))
+
+$(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
+	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
 
 $(BUILD)/test-libbloom: $(BUILD)/libbloom.$(SO) $(BUILD)/test.o
 	(cd $(BUILD) && $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
+
+$(BUILD)/test-basic: misc/test/basic.c $(BUILD)/libbloom.a
+	$(CC) -I$(TOP) $(LIB) \
+	    misc/test/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
 
 $(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
@@ -92,11 +101,11 @@ clean:
 	rm -rf $(BUILD)
 
 lint:
-	lint -x -errfmt=simple $(INC) $(LIB) *.c murmur2/*.c
+	lint -x -errfmt=simple $(INC) $(LIB) bloom.c
 
-test: $(BUILD)/test-libbloom
+test: $(BUILD)/test-libbloom $(BUILD)/test-basic
+	$(BUILD)/test-basic
 	$(BUILD)/test-libbloom
-
 
 .PHONY: perf_report
 perf_report: $(BUILD)/test-libbloom
