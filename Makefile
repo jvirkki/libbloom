@@ -30,6 +30,7 @@ BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
 CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC -D_GNU_SOURCE -DBLOOM_VERSION=$(BLOOM_VERSION)
+TESTDIR=$(TOP)/misc/test
 
 #
 # Defines used by the perf_test target
@@ -82,12 +83,14 @@ $(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
 
-$(BUILD)/test-libbloom: $(BUILD)/libbloom.$(SO) $(BUILD)/test.o
-	(cd $(BUILD) && $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
+$(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/libbloom.$(SO)
+	$(CC) -I$(TOP) -c $(TESTDIR)/test.c -o $(BUILD)/test.o
+	(cd $(BUILD) && \
+	    $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
-$(BUILD)/test-basic: misc/test/basic.c $(BUILD)/libbloom.a
+$(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
 	$(CC) -I$(TOP) $(LIB) \
-	    misc/test/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
+	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
 
 $(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
