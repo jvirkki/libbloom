@@ -46,6 +46,11 @@ SO=so
 CC=gcc
 endif
 
+ifeq ($(BUILD_OS),OpenBSD)
+RPATH=-R$(BUILD)
+SO=so
+endif
+
 ifeq ($(BUILD_OS),Darwin)
 MAC=-install_name $(BUILD)/libbloom.dylib
 RPATH=-Xlinker -rpath -Xlinker $(BUILD)
