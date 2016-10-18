@@ -49,7 +49,7 @@ static int bloom_check_add(struct bloom * bloom,
                            const void * buffer, int len, int add)
 {
   if (bloom->ready == 0) {
-    (void)printf("bloom at %p not initialized!\n", (void *)bloom);
+    printf("bloom at %p not initialized!\n", (void *)bloom);
     return -1;
   }
 
@@ -131,13 +131,13 @@ int bloom_add(struct bloom * bloom, const void * buffer, int len)
 
 void bloom_print(struct bloom * bloom)
 {
-  (void)printf("bloom at %p\n", (void *)bloom);
-  (void)printf(" ->entries = %d\n", bloom->entries);
-  (void)printf(" ->error = %f\n", bloom->error);
-  (void)printf(" ->bits = %d\n", bloom->bits);
-  (void)printf(" ->bits per elem = %f\n", bloom->bpe);
-  (void)printf(" ->bytes = %d\n", bloom->bytes);
-  (void)printf(" ->hash functions = %d\n", bloom->hashes);
+  printf("bloom at %p\n", (void *)bloom);
+  printf(" ->entries = %d\n", bloom->entries);
+  printf(" ->error = %f\n", bloom->error);
+  printf(" ->bits = %d\n", bloom->bits);
+  printf(" ->bits per elem = %f\n", bloom->bpe);
+  printf(" ->bytes = %d\n", bloom->bytes);
+  printf(" ->hash functions = %d\n", bloom->hashes);
 }
 
 

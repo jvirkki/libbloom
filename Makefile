@@ -103,9 +103,6 @@ $(BUILD)/murmurhash2.o: murmur2/MurmurHash2.c murmur2/murmurhash2.h
 clean:
 	rm -rf $(BUILD)
 
-lint:
-	lint -x -errfmt=simple $(INC) $(LIB) bloom.c
-
 test: $(BUILD)/test-libbloom $(BUILD)/test-basic
 	$(BUILD)/test-basic
 	$(BUILD)/test-libbloom
