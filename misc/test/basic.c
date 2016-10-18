@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 {
   struct bloom bloom;
 
-  printf("----- basic tests with static library -----\n");
+  printf("----- Basic tests with static library -----\n");
   assert(bloom_init(&bloom, 0, 1.0) == 1);
   assert(bloom_init(&bloom, 10, 0) == 1);
   assert(bloom.ready == 0);
@@ -54,5 +54,5 @@ int main(int argc, char **argv)
   assert(bloom_add(&bloom, "hello", 5) > 0);
   assert(bloom_check(&bloom, "hello", 5) == 1);
   bloom_free(&bloom);
-  printf("----- DONE basic tests with static library -----\n");
+  printf("----- DONE Basic tests with static library -----\n");
 }

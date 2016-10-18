@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,9 +28,9 @@
  * A few simple tests to check if it works at all.
  *
  */
-static void basic()
+static int basic()
 {
-  (void)printf("----- basic -----\n");
+  printf("----- basic -----\n");
 
   struct bloom bloom;
 
@@ -52,6 +53,8 @@ static void basic()
   assert(bloom_add(&bloom, "hello", 5) > 0);
   assert(bloom_check(&bloom, "hello", 5) == 1);
   bloom_free(&bloom);
+
+  return 0;
 }
 
 
@@ -60,28 +63,46 @@ static void basic()
  * into it to see if collission rates are within expectations.
  *
  */
-static void add_random(int entries, double error, int count,
-                       int quiet, int check_error)
+static int add_random(int entries, double error, int count,
+                      int quiet, int check_error, uint8_t elem_size, int validate)
 {
   if (!quiet) {
-    (void)printf("----- add_random(%d, %f, %d, %d, %d) -----\n",
-                 entries, error, count, quiet, check_error);
+    printf("----- add_random(%d, %f, %d, %d, %d, %d, %d) -----\n",
+           entries, error, count, quiet, check_error, elem_size, validate);
   }
 
   struct bloom bloom;
   assert(bloom_init(&bloom, entries, error) == 0);
   if (!quiet) { bloom_print(&bloom); }
 
-  char block[32];
+  char block[elem_size];
+  uint8_t * saved;
+  uint8_t * savedp;
   int collisions = 0;
-  int fd = open("/dev/urandom", O_RDONLY);
   int n;
 
-  for (n = 0; n < count; n++) {
-    assert(read(fd, block, 32) == 32);
-    if (bloom_add(&bloom, (void *)block, 32)) { collisions++; }
+  int fd = open("/dev/urandom", O_RDONLY);
+  if (fd < 0) {
+    printf("error: unable to open /dev/random\n");
+    exit(1);
   }
-  (void)close(fd);
+
+  if (validate) {
+    saved = (uint8_t *)malloc(elem_size * count);
+    if (!saved) {
+      printf("error: unable to allocate buffer for validation\n");
+      exit(1);
+    }
+    savedp = saved;
+  }
+
+  for (n = 0; n < count; n++) {
+    assert(read(fd, block, elem_size) == elem_size);
+    memcpy(savedp, block, elem_size);
+    savedp += elem_size;
+    if (bloom_add(&bloom, (void *)block, elem_size)) { collisions++; }
+  }
+  close(fd);
 
   double er = (double)collisions / (double)count;
 
@@ -99,7 +120,18 @@ static void add_random(int entries, double error, int count,
     exit(1);
   }
 
+  if (validate) {
+    for (n = 0; n < count; n++) {
+      if (!bloom_check(&bloom, saved + (n * elem_size), elem_size)) {
+        printf("error: data saved in filter is not there!\n");
+        exit(1);
+      }
+    }
+  }
+
   bloom_free(&bloom);
+  if (saved) { free(saved); }
+  return 0;
 }
 
 
@@ -107,9 +139,9 @@ static void add_random(int entries, double error, int count,
  * Simple loop to compare performance.
  *
  */
-static void perf_loop(int entries, int count)
+static int perf_loop(int entries, int count)
 {
-  (void)printf("----- perf_loop -----\n");
+  printf("----- perf_loop -----\n");
 
   struct bloom bloom;
   assert(bloom_init(&bloom, entries, 0.001) == 0);
@@ -119,32 +151,82 @@ static void perf_loop(int entries, int count)
   int collisions = 0;
 
   struct timeval tp;
-  (void)gettimeofday(&tp, NULL);
+  gettimeofday(&tp, NULL);
   long before = (tp.tv_sec * 1000L) + (tp.tv_usec / 1000L);
 
   for (i = 0; i < count; i++) {
     if (bloom_add(&bloom, (void *)&i, sizeof(int))) { collisions++; }
   }
 
-  (void)gettimeofday(&tp, NULL);
+  gettimeofday(&tp, NULL);
   long after = (tp.tv_sec * 1000L) + (tp.tv_usec / 1000L);
 
-  (void)printf("Added %d elements of size %d, took %d ms (collisions=%d)\n",
-               count, (int)sizeof(int), (int)(after - before), collisions);
+  printf("Added %d elements of size %d, took %d ms (collisions=%d)\n",
+         count, (int)sizeof(int), (int)(after - before), collisions);
 
-  (void)printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
+  printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
 
   bloom_print(&bloom);
   bloom_free(&bloom);
+
+  return 0;
 }
 
 
 /** ***************************************************************************
- * main...
+ * Default set of basic tests.
  *
- * To test performance only, run with options:  -p ENTRIES COUNT
- * Where 'ENTRIES' is the expected number of entries used to initialize the
- * bloom filter and 'COUNT' is the actual number of entries inserted.
+ * These should run reasonably quick so they can be run all the time.
+ *
+ */
+static int basic_tests()
+{
+  int rv = 0;
+  int e;
+
+  rv += basic();
+  rv += add_random(10, 0.1, 10, 0, 1, 32, 1);
+  rv += add_random(10000, 0.1, 10000, 0, 1, 32, 1);
+  rv += add_random(10000, 0.01, 10000, 0, 1, 32, 1);
+  rv += add_random(10000, 0.001, 10000, 0, 1, 32, 1);
+  rv += add_random(10000, 0.0001, 10000, 0, 1, 32, 1);
+  rv += add_random(1000000, 0.0001, 1000000, 0, 1, 32, 1);
+
+  printf("\nBrought to you by libbloom-%s\n", bloom_version());
+
+  return 0;
+}
+
+
+/** ***************************************************************************
+ * Some longer-running tests.
+ *
+ */
+static int larger_tests()
+{
+  int rv = 0;
+  int e;
+
+  printf("\nAdd 10M elements and verify (0.00001)\n");
+  rv += add_random(10000000, 0.00001, 10000000, 0, 1, 32, 1);
+
+  printf("\nChecking collision rates with filters from 100K to 1M (0.001)\n");
+  for (e = 100000; e <= 1000000; e+= 100) {
+    rv += add_random(e, 0.001, e, 1, 1, 8, 1);
+  }
+
+  return rv;
+}
+
+
+/** ***************************************************************************
+ * With no options, runs brief default tests.
+ *
+ * With -L, runs some longer-running tests.
+ *
+ * To test collisions over a range of sizes: -G START END INCREMENT ERROR
+ * This produces output that can be graphed with collisions/dograph
+ * See also collision_test make target.
  *
  * To test collisions, run with options: -c ENTRIES ERROR COUNT
  * Where 'ENTRIES' is the expected number of entries used to initialize the
@@ -152,46 +234,57 @@ static void perf_loop(int entries, int count)
  * used to initialize the bloom filter. 'COUNT' is the actual number of
  * entries inserted.
  *
- * To test collisions over a range of sizes: -G START END INCREMENT ERROR
- *
- * With no options, it runs various default tests.
+ * To test performance only, run with options:  -p ENTRIES COUNT
+ * Where 'ENTRIES' is the expected number of entries used to initialize the
+ * bloom filter and 'COUNT' is the actual number of entries inserted.
  *
  */
 int main(int argc, char **argv)
 {
-  if (argc == 6 && !strncmp(argv[1], "-G", 2)) {
+  // Calls return() instead of exit() just to make valgrind mark as
+  // an error any reachable allocations. That makes them show up
+  // when running the tests.
+
+  int rv = 0;
+
+  if (argc == 1) {
+    printf("----- Running basic tests -----\n");
+    rv = basic_tests();
+    printf("----- DONE Running basic tests -----\n");
+    return rv;
+  }
+
+  if (!strncmp(argv[1], "-L", 2)) {
+    return larger_tests();
+  }
+
+  if (!strncmp(argv[1], "-G", 2)) {
+    if (argc != 6) {
+      printf("-G START END INCREMENT ERROR\n");
+      return 1;
+    }
     int e;
     for (e = atoi(argv[2]); e <= atoi(argv[3]); e+= atoi(argv[4])) {
-      add_random(e, atof(argv[5]), e, 1, 0);
+      rv += add_random(e, atof(argv[5]), e, 1, 0, 32, 1);
     }
-    exit(0);
+    return rv;
   }
 
-  if (argc == 4 && !strncmp(argv[1], "-p", 2)) {
-    perf_loop(atoi(argv[2]), atoi(argv[3]));
-    exit(0);
-  }
-
-  if (argc > 4 && !strncmp(argv[1], "-c", 2)) {
-    switch (argc) {
-    case 5:
-      add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0, 1);
-      break;
-    default:
+  if (!strncmp(argv[1], "-c", 2)) {
+    if (argc != 5) {
       printf("-c ENTRIES ERROR COUNT\n");
+      return 1;
     }
-    exit(0);
+
+    return add_random(atoi(argv[2]), atof(argv[3]), atoi(argv[4]), 0, 1, 32, 1);
   }
 
-  basic();
-  add_random(100, 0.001, 300, 0, 0);
-
-  int i;
-  for (i = 0; i < 10; i++) {
-    add_random(1000000, 0.001, 1000000, 0, 1);
+  if (!strncmp(argv[1], "-p", 2)) {
+    if (argc != 4) {
+      printf("-p ENTRIES COUNT\n");
+    }
+    return perf_loop(atoi(argv[2]), atoi(argv[3]));
   }
 
-  perf_loop(10000000, 10000000);
-
-  printf("\nBrought to you by libbloom-%s\n", bloom_version());
+  return rv;
 }

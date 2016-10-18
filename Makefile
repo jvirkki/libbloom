@@ -122,15 +122,17 @@ ifeq ($(BUILD_OS),Linux)
 endif
 
 vtest: $(BUILD)/test-libbloom
-	valgrind --tool=memcheck --leak-check=full $(BUILD)/test-libbloom
+	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
+	    $(BUILD)/test-libbloom
 
 gcov:
 	$(MAKE) clean
-	DEBUG=1 DEBUGOPT="-fprofile-arcs -ftest-coverage" $(MAKE) all
+	DEBUG=1 DEBUGOPT="-fprofile-arcs -ftest-coverage" \
+	    $(MAKE) $(BUILD)/test-libbloom
 	(cd $(BUILD) && \
-		cp ../*.c . && \
-		./test-libbloom && \
-		gcov -bf bloom.c)
+	    cp ../*.c . && \
+	    ./test-libbloom && \
+	    gcov -bf bloom.c)
 	@echo Remember to make clean to remove instrumented objects
 
 #
@@ -143,4 +145,19 @@ gcov:
 # to run.
 #
 collision_test: $(BUILD)/test-libbloom
-	$(BUILD)/test-libbloom -G 100000 1000000 10 0.001 | tee collision_data_v$(BLOOM_VERSION)
+	$(BUILD)/test-libbloom -G 100000 1000000 10 0.001 \
+	    | tee collision_data_v$(BLOOM_VERSION)
+
+#
+# This target should be run when preparing a release, includes more tests
+# than the 'test' target.
+# For a final release, should run the collision_test target above as well,
+# not included here as it takes so long.
+#
+release_test:
+	$(MAKE) test
+	$(MAKE) vtest
+	$(BUILD)/test-libbloom -G 100000 1000000 50000 0.001 \
+	    | tee short_coll_data
+	gzip short_coll_data
+	./data/collisions/dograph short_coll_data.gz
