@@ -138,8 +138,8 @@ gcov:
 #
 # This target runs a test which creates a filter of capacity N and inserts
 # N elements, for N in 100,000 to 1,000,000 with an expected error of 0.001.
-# To preserve and graph the output, move it to ./data/collisions and use
-# the ./data/collisions/dograph script to plot it.
+# To preserve and graph the output, move it to ./misc/collisions and use
+# the ./misc/collisions/dograph script to plot it.
 #
 # WARNING: This can take a very long time (on a slow machine, multiple days)
 # to run.
@@ -160,4 +160,4 @@ release_test:
 	$(BUILD)/test-libbloom -G 100000 1000000 50000 0.001 \
 	    | tee short_coll_data
 	gzip short_coll_data
-	./data/collisions/dograph short_coll_data.gz
+	./misc/collisions/dograph short_coll_data.gz
