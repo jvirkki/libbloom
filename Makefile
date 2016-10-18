@@ -1,4 +1,4 @@
-
+#
 # Copyright (c) 2012-2016, Jyri J. Virkki
 # All rights reserved.
 #
@@ -15,10 +15,9 @@
 # Other build targets:
 #
 #   make test           to build and run test code
+#   make release_test   to build and run larger tests
 #   make gcov           to build with code coverage and run gcov
-#   make lint           to run lint
 #   make clean          the usual
-#   make perf_report    generate perf reports (see README.perf)
 #
 
 BLOOM_VERSION=1.3dev
@@ -29,21 +28,8 @@ BUILD_OS := $(shell uname)
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-CC=gcc -Wall ${OPT} ${MM} -std=c99 -fPIC -D_GNU_SOURCE -DBLOOM_VERSION=$(BLOOM_VERSION)
+COM=${CC} -Wall ${OPT} ${MM} -std=c99 -fPIC -DBLOOM_VERSION=$(BLOOM_VERSION)
 TESTDIR=$(TOP)/misc/test
-
-#
-# Defines used by the perf_test target
-#
-HEAD=$(shell git log -1 --format="%h_%f")
-ifndef HOSTNAME
-HOSTNAME=$(shell hostname)
-endif
-PERF_TEST_DIR=$(TOP)/perf_reports
-PERF_TEST_DIR_HEAD=$(PERF_TEST_DIR)/$(HEAD)
-PERF_TEST_DIR_CPU=$(PERF_TEST_DIR_HEAD)/$(HOSTNAME)_$(CPU_ID)
-CPU_ID=$(shell $(PERF_TEST_DIR)/cpu_id)
-
 
 ifeq ($(MM),)
 MM=-m64
@@ -52,7 +38,6 @@ endif
 ifeq ($(BUILD_OS),Linux)
 RPATH=-Wl,-rpath,$(BUILD)
 SO=so
-PERF_STAT=perf stat --log-fd 1
 endif
 
 ifeq ($(BUILD_OS),SunOS)
@@ -77,28 +62,28 @@ all: $(BUILD)/libbloom.$(SO) $(BUILD)/libbloom.a
 
 $(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
-	    $(CC) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
+	    $(COM) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
 	    -o libbloom.$(SO))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
 
 $(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/libbloom.$(SO)
-	$(CC) -I$(TOP) -c $(TESTDIR)/test.c -o $(BUILD)/test.o
+	$(COM) -I$(TOP) -c $(TESTDIR)/test.c -o $(BUILD)/test.o
 	(cd $(BUILD) && \
-	    $(CC) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
+	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
 $(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
-	$(CC) -I$(TOP) $(LIB) \
+	$(COM) -I$(TOP) $(LIB) \
 	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
 
 $(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
-	$(CC) $(INC) -c $< -o $@
+	$(COM) $(INC) -c $< -o $@
 
 $(BUILD)/murmurhash2.o: murmur2/MurmurHash2.c murmur2/murmurhash2.h
 	mkdir -p $(BUILD)
-	$(CC) $(INC) -c murmur2/MurmurHash2.c -o $(BUILD)/murmurhash2.o
+	$(COM) $(INC) -c murmur2/MurmurHash2.c -o $(BUILD)/murmurhash2.o
 
 clean:
 	rm -rf $(BUILD)
@@ -106,17 +91,6 @@ clean:
 test: $(BUILD)/test-libbloom $(BUILD)/test-basic
 	$(BUILD)/test-basic
 	$(BUILD)/test-libbloom
-
-.PHONY: perf_report
-perf_report: $(BUILD)/test-libbloom
-	mkdir -p $(PERF_TEST_DIR_CPU)
-	$(PERF_STAT) $(BUILD)/test-libbloom -p  5000000  5000000 | tee $(PERF_TEST_DIR_CPU)/test_1.log
-	$(PERF_STAT) $(BUILD)/test-libbloom -p 10000000 10000000 | tee $(PERF_TEST_DIR_CPU)/test_2.log
-	$(PERF_STAT) $(BUILD)/test-libbloom -p 50000000 50000000 | tee $(PERF_TEST_DIR_CPU)/test_3.log
-ifeq ($(BUILD_OS),Linux)
-	lscpu > ${PERF_TEST_DIR_CPU}/lscpu.log
-	inxi -Cm -c0 > ${PERF_TEST_DIR_CPU}/inxi.log 2>/dev/null || inxi -C -c0 > ${PERF_TEST_DIR_CPU}/inxi.log
-endif
 
 vtest: $(BUILD)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
