@@ -76,8 +76,8 @@ static int add_random(int entries, double error, int count,
   if (!quiet) { bloom_print(&bloom); }
 
   char block[elem_size];
-  uint8_t * saved;
-  uint8_t * savedp;
+  uint8_t * saved = NULL;
+  uint8_t * savedp = NULL;
   int collisions = 0;
   int n;
 
@@ -182,7 +182,6 @@ static int perf_loop(int entries, int count)
 static int basic_tests()
 {
   int rv = 0;
-  int e;
 
   rv += basic();
   rv += add_random(10, 0.1, 10, 0, 1, 32, 1);
