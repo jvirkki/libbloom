@@ -20,7 +20,7 @@
 #   make clean          the usual
 #
 
-BLOOM_VERSION=1.3dev
+BLOOM_VERSION=1.3
 
 TOP := $(shell /bin/pwd)
 BUILD_OS := $(shell uname)
