@@ -43,6 +43,7 @@ endif
 ifeq ($(BUILD_OS),SunOS)
 RPATH=-R$(BUILD)
 SO=so
+CC=gcc
 endif
 
 ifeq ($(BUILD_OS),Darwin)
