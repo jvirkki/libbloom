@@ -30,16 +30,15 @@
 inline static int test_bit_set_bit(unsigned char * buf,
                                    unsigned int x, int set_bit)
 {
-  register uint32_t * word_buf = (uint32_t *)buf;
-  register unsigned int offset = x >> 5;
-  register uint32_t word = word_buf[offset];
-  register unsigned int mask = 1 << (x % 32);
+  unsigned int byte = x >> 3;
+  unsigned char c = buf[byte];        // expensive memory access
+  unsigned int mask = 1 << (x % 8);
 
-  if (word & mask) {
+  if (c & mask) {
     return 1;
   } else {
     if (set_bit) {
-      word_buf[offset] = word | mask;
+      buf[byte] = c | mask;
     }
     return 0;
   }
