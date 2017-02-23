@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2016, Jyri J. Virkki
+# Copyright (c) 2012-2017, Jyri J. Virkki
 # All rights reserved.
 #
 # This file is under BSD license. See LICENSE file.
@@ -20,7 +20,7 @@
 #   make clean          the usual
 #
 
-BLOOM_VERSION=1.4dev
+BLOOM_VERSION=1.4
 BLOOM_SONAME=libbloom.so.1
 
 TOP := $(shell /bin/pwd)
