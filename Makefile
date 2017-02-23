@@ -71,7 +71,7 @@ $(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
 	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
 		-Wl,-soname,$(BLOOM_SONAME) -o libbloom.$(SO) && \
-		cp -a libbloom.$(SO) libbloom.$(SO).$(BLOOM_VERSION) && \
+		cp -p libbloom.$(SO) libbloom.$(SO).$(BLOOM_VERSION) && \
 		ln -s libbloom.$(SO).$(BLOOM_VERSION) $(BLOOM_SONAME))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
