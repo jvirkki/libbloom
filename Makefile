@@ -21,6 +21,7 @@
 #
 
 BLOOM_VERSION=1.4dev
+BLOOM_SONAME=libbloom.so.1
 
 TOP := $(shell /bin/pwd)
 BUILD_OS := $(shell uname)
@@ -69,7 +70,9 @@ all: $(BUILD)/libbloom.$(SO) $(BUILD)/libbloom.a
 $(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
 	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
-	    -o libbloom.$(SO))
+		-Wl,-soname,$(BLOOM_SONAME) -o libbloom.$(SO) && \
+		cp -a libbloom.$(SO) libbloom.$(SO).$(BLOOM_VERSION) && \
+		ln -s libbloom.$(SO).$(BLOOM_VERSION) $(BLOOM_SONAME))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
