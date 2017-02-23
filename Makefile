@@ -28,7 +28,7 @@ BUILD_OS := $(shell uname)
 BUILD=$(TOP)/build
 INC=-I$(TOP) -I$(TOP)/murmur2
 LIB=-lm
-COM=${CC} -Wall ${OPT} ${MM} -std=c99 -fPIC -DBLOOM_VERSION=$(BLOOM_VERSION)
+COM=${CC} $(CFLAGS) $(CPPFLAGS) -Wall ${OPT} ${MM} -std=c99 -fPIC -DBLOOM_VERSION=$(BLOOM_VERSION)
 TESTDIR=$(TOP)/misc/test
 
 ifeq ($(MM),)
@@ -68,7 +68,7 @@ all: $(BUILD)/libbloom.$(SO) $(BUILD)/libbloom.a
 
 $(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
-	    $(COM) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
+	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
 	    -o libbloom.$(SO))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
