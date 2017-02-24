@@ -78,19 +78,19 @@ OPT=-O3
 endif
 
 
-all: $(BUILD)/libbloom.$(SO) $(BUILD)/libbloom.a
+all: $(BUILD)/$(SO_VERSIONED) $(BUILD)/libbloom.a
 
-$(BUILD)/libbloom.$(SO): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
+$(BUILD)/$(SO_VERSIONED): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
 	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
-		$(LD_SONAME) -o libbloom.$(SO) && \
-		cp -p libbloom.$(SO) $(SO_VERSIONED) && \
-		ln -s $(SO_VERSIONED) $(BLOOM_SONAME))
+		$(LD_SONAME) -o $(SO_VERSIONED) && \
+		ln -s $(SO_VERSIONED) $(BLOOM_SONAME) && \
+		ln -s $(BLOOM_SONAME) libbloom.$(SO))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
 
-$(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/libbloom.$(SO)
+$(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/$(SO_VERSIONED)
 	$(COM) -I$(TOP) -c $(TESTDIR)/test.c -o $(BUILD)/test.o
 	(cd $(BUILD) && \
 	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
