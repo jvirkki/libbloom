@@ -10,7 +10,8 @@
 # Other build options:
 #
 #   DEBUG=1 make        to build debug instead of optimized
-#   MM=-m32 make        to build 32bit library
+#   BITS=32 make        to build 32bit library
+#   BITS=default make	to build platform default bitness (32 or 64)
 #
 # Other build targets:
 #
@@ -33,8 +34,16 @@ LIB=-lm
 COM=${CC} $(CFLAGS) $(CPPFLAGS) -Wall ${OPT} ${MM} -std=c99 -fPIC -DBLOOM_VERSION=$(BLOOM_VERSION)
 TESTDIR=$(TOP)/misc/test
 
-ifeq ($(MM),)
+ifeq ($(BITS),)
 MM=-m64
+else ifeq ($(BITS),64)
+MM=-m64
+else ifeq ($(BITS),32)
+MM=-m32
+else ifeq ($(BITS),default)
+MM=
+else
+MM=$(BITS)
 endif
 
 #
