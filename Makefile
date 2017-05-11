@@ -56,7 +56,7 @@ LD_SONAME=-Wl,-soname,$(BLOOM_SONAME)
 SO=so
 
 
-ifeq ($(BUILD_OS),Linux)
+ifeq ($(BUILD_OS),$(filter $(BUILD_OS), GNU/kFreeBSD GNU Linux))
 RPATH=-Wl,-rpath,$(BUILD)
 endif
 
