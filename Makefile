@@ -11,7 +11,7 @@
 #
 #   DEBUG=1 make        to build debug instead of optimized
 #   BITS=32 make        to build 32bit library
-#   BITS=default make	to build platform default bitness (32 or 64)
+#   BITS=default make   to build platform default bitness (32 or 64)
 #
 # Other build targets:
 #
@@ -93,8 +93,8 @@ $(BUILD)/$(SO_VERSIONED): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && \
 	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
 		$(LD_SONAME) -o $(SO_VERSIONED) && \
-		ln -s $(SO_VERSIONED) $(BLOOM_SONAME) && \
-		ln -s $(BLOOM_SONAME) libbloom.$(SO))
+		rm -f $(BLOOM_SONAME) && ln -s $(SO_VERSIONED) $(BLOOM_SONAME) && \
+		rm -f libbloom.$(SO) && ln -s $(BLOOM_SONAME) libbloom.$(SO))
 
 $(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
 	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
