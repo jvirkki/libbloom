@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016, Jyri J. Virkki
+ *  Copyright (c) 2016-2017, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
   assert(bloom_check(&bloom, "hello world", 11) == -1);
   bloom_free(&bloom);
 
-  assert(bloom_init(&bloom, 102, 0.1) == 0);
+  assert(bloom_init(&bloom, 1002, 0.1) == 0);
   assert(bloom.ready == 1);
   bloom_print(&bloom);
 

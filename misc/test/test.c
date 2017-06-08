@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2016, Jyri J. Virkki
+ *  Copyright (c) 2012-2017, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -41,7 +41,7 @@ static int basic()
   assert(bloom_check(&bloom, "hello world", 11) == -1);
   bloom_free(&bloom);
 
-  assert(bloom_init(&bloom, 102, 0.1) == 0);
+  assert(bloom_init(&bloom, 1002, 0.1) == 0);
   assert(bloom.ready == 1);
   bloom_print(&bloom);
 
@@ -184,7 +184,6 @@ static int basic_tests()
   int rv = 0;
 
   rv += basic();
-  rv += add_random(10, 0.1, 10, 0, 1, 32, 1);
   rv += add_random(10000, 0.1, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.01, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.001, 10000, 0, 1, 32, 1);

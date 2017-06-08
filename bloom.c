@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2016, Jyri J. Virkki
+ *  Copyright (c) 2012-2017, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -85,7 +85,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 {
   bloom->ready = 0;
 
-  if (entries < 1 || error == 0) {
+  if (entries < 1000 || error == 0) {
     return 1;
   }
 
