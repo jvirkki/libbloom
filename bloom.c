@@ -76,11 +76,7 @@ static int bloom_check_add(struct bloom * bloom,
     }
   }
 
-  if (hits == bloom->hashes) {
-    return 1;                // 1 == element already in (or collision)
-  }
-
-  return 0;
+  return hits;
 }
 
 
@@ -129,15 +125,31 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
 int bloom_check(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, MODE_READ);
+  int rv = bloom_check_add(bloom, buffer, len, MODE_READ);
+  return rv <= 0 ? rv : 1;
 }
-
 
 int bloom_add(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, MODE_WRITE);
+  int rv = bloom_add_retbits(bloom, buffer, len);
+  if (rv == 0) {
+    return 1; // No new bits added
+  } else if (rv < 0) {
+    return rv;
+  } else {
+    return 0;
+  }
 }
 
+int bloom_add_retbits(struct bloom * bloom, const void * buffer, int len)
+{
+  int rv = bloom_check_add(bloom, buffer, len, MODE_WRITE);
+  if (rv < 0) {
+    return -1;
+  } else {
+    return bloom->hashes - rv;
+  }
+}
 
 void bloom_print(struct bloom * bloom)
 {

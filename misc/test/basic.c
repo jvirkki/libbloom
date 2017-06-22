@@ -54,5 +54,17 @@ int main(int argc, char **argv)
   assert(bloom_add(&bloom, "hello", 5) > 0);
   assert(bloom_check(&bloom, "hello", 5) == 1);
   bloom_free(&bloom);
+
+  assert(bloom_init(&bloom, 1002, 0.1) == 0);
+  assert(bloom_check(&bloom, "hello world", 11) == 0);
+  assert(bloom_add_retbits(&bloom, "hello world", 11) == bloom.hashes);
+  assert(bloom_check(&bloom, "hello world", 11) == 1);
+  assert(bloom_add_retbits(&bloom, "hello world", 11) == 0);
+  assert(bloom_add_retbits(&bloom, "hello", 5) > 0);
+  assert(bloom_check(&bloom, "hello", 5) == 1);
+  assert(bloom_add_retbits(&bloom, "hello", 5) == 0);
+  assert(bloom_check(&bloom, "hello", 5) == 1);
+  bloom_free(&bloom);
+
   printf("----- DONE Basic tests with static library -----\n");
 }
