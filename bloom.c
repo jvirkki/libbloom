@@ -26,6 +26,10 @@
 #define MAKESTRING(n) STRING(n)
 #define STRING(n) #n
 
+#ifndef BLOOM_CALLOC
+#define BLOOM_CALLOC calloc
+#define BLOOM_FREE free
+#endif
 
 inline static int test_bit_set_bit(unsigned char * buf,
                                    unsigned int x, int set_bit)
@@ -107,7 +111,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
   bloom->hashes = (int)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
 
-  bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
+  bloom->bf = (unsigned char *)BLOOM_CALLOC(bloom->bytes, sizeof(unsigned char));
   if (bloom->bf == NULL) {
     return 1;
   }
@@ -144,7 +148,7 @@ void bloom_print(struct bloom * bloom)
 void bloom_free(struct bloom * bloom)
 {
   if (bloom->ready) {
-    free(bloom->bf);
+    BLOOM_FREE(bloom->bf);
   }
   bloom->ready = 0;
 }
