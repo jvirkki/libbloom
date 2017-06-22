@@ -63,6 +63,9 @@ static int bloom_check_add(struct bloom * bloom,
     x = (a + i*b) % bloom->bits;
     if (test_bit_set_bit(bloom->bf, x, add)) {
       hits++;
+    } else if (!add) {
+      // Don't care about the presence of all the bits. Just our own.
+      return 0;
     }
   }
 
