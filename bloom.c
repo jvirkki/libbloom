@@ -31,8 +31,11 @@
 #define BLOOM_FREE free
 #endif
 
+#define MODE_READ 0
+#define MODE_WRITE 1
+
 inline static int test_bit_set_bit(unsigned char * buf,
-                                   unsigned int x, int set_bit)
+                                   unsigned int x, int mode)
 {
   unsigned int byte = x >> 3;
   unsigned char c = buf[byte];        // expensive memory access
@@ -41,7 +44,7 @@ inline static int test_bit_set_bit(unsigned char * buf,
   if (c & mask) {
     return 1;
   } else {
-    if (set_bit) {
+    if (mode == MODE_WRITE) {
       buf[byte] = c | mask;
     }
     return 0;
@@ -50,7 +53,7 @@ inline static int test_bit_set_bit(unsigned char * buf,
 
 
 static int bloom_check_add(struct bloom * bloom,
-                           const void * buffer, int len, int add)
+                           const void * buffer, int len, int mode)
 {
   if (bloom->ready == 0) {
     printf("bloom at %p not initialized!\n", (void *)bloom);
@@ -65,7 +68,7 @@ static int bloom_check_add(struct bloom * bloom,
 
   for (i = 0; i < bloom->hashes; i++) {
     x = (a + i*b) % bloom->bits;
-    if (test_bit_set_bit(bloom->bf, x, add)) {
+    if (test_bit_set_bit(bloom->bf, x, mode)) {
       hits++;
     }
   }
@@ -123,13 +126,13 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
 int bloom_check(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, 0);
+  return bloom_check_add(bloom, buffer, len, MODE_READ);
 }
 
 
 int bloom_add(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, 1);
+  return bloom_check_add(bloom, buffer, len, MODE_WRITE);
 }
 
 
