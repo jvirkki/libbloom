@@ -119,6 +119,14 @@ int bloom_add(struct bloom * bloom, const void * buffer, int len);
 
 
 /** ***************************************************************************
+ * Add the given element to the bloom filter, returning the number of bits
+ * actually added. If the return value is 0 then it means that the item either
+ * exists or a collision has been encountered
+ */
+int bloom_add_retbits(struct bloom *bloom, const void *buffer, int len);
+
+
+/** ***************************************************************************
  * Print (to stdout) info about this bloom filter. Debugging aid.
  *
  */

@@ -26,9 +26,16 @@
 #define MAKESTRING(n) STRING(n)
 #define STRING(n) #n
 
+#ifndef BLOOM_CALLOC
+#define BLOOM_CALLOC calloc
+#define BLOOM_FREE free
+#endif
+
+#define MODE_READ 0
+#define MODE_WRITE 1
 
 inline static int test_bit_set_bit(unsigned char * buf,
-                                   unsigned int x, int set_bit)
+                                   unsigned int x, int mode)
 {
   unsigned int byte = x >> 3;
   unsigned char c = buf[byte];        // expensive memory access
@@ -37,7 +44,7 @@ inline static int test_bit_set_bit(unsigned char * buf,
   if (c & mask) {
     return 1;
   } else {
-    if (set_bit) {
+    if (mode == MODE_WRITE) {
       buf[byte] = c | mask;
     }
     return 0;
@@ -46,7 +53,7 @@ inline static int test_bit_set_bit(unsigned char * buf,
 
 
 static int bloom_check_add(struct bloom * bloom,
-                           const void * buffer, int len, int add)
+                           const void * buffer, int len, int mode)
 {
   if (bloom->ready == 0) {
     printf("bloom at %p not initialized!\n", (void *)bloom);
@@ -61,16 +68,15 @@ static int bloom_check_add(struct bloom * bloom,
 
   for (i = 0; i < bloom->hashes; i++) {
     x = (a + i*b) % bloom->bits;
-    if (test_bit_set_bit(bloom->bf, x, add)) {
+    if (test_bit_set_bit(bloom->bf, x, mode)) {
       hits++;
+    } else if (mode == MODE_READ) {
+      // Don't care about the presence of all the bits. Just our own.
+      return 0;
     }
   }
 
-  if (hits == bloom->hashes) {
-    return 1;                // 1 == element already in (or collision)
-  }
-
-  return 0;
+  return hits;
 }
 
 
@@ -107,7 +113,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
   bloom->hashes = (int)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
 
-  bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
+  bloom->bf = (unsigned char *)BLOOM_CALLOC(bloom->bytes, sizeof(unsigned char));
   if (bloom->bf == NULL) {
     return 1;
   }
@@ -119,15 +125,31 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
 int bloom_check(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, 0);
+  int rv = bloom_check_add(bloom, buffer, len, MODE_READ);
+  return rv <= 0 ? rv : 1;
 }
-
 
 int bloom_add(struct bloom * bloom, const void * buffer, int len)
 {
-  return bloom_check_add(bloom, buffer, len, 1);
+  int rv = bloom_add_retbits(bloom, buffer, len);
+  if (rv == 0) {
+    return 1; // No new bits added
+  } else if (rv < 0) {
+    return rv;
+  } else {
+    return 0;
+  }
 }
 
+int bloom_add_retbits(struct bloom * bloom, const void * buffer, int len)
+{
+  int rv = bloom_check_add(bloom, buffer, len, MODE_WRITE);
+  if (rv < 0) {
+    return -1;
+  } else {
+    return bloom->hashes - rv;
+  }
+}
 
 void bloom_print(struct bloom * bloom)
 {
@@ -144,7 +166,7 @@ void bloom_print(struct bloom * bloom)
 void bloom_free(struct bloom * bloom)
 {
   if (bloom->ready) {
-    free(bloom->bf);
+    BLOOM_FREE(bloom->bf);
   }
   bloom->ready = 0;
 }
