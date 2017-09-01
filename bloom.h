@@ -79,7 +79,7 @@ int bloom_init_size(struct bloom * bloom, int entries, double error,
 
 /** ***************************************************************************
  * Check if the given element is in the bloom filter. Remember this may
- * return false positive if a collision occured.
+ * return false positive if a collision occurred.
  *
  * Parameters:
  * -----------
