@@ -18,6 +18,8 @@ Pull requests
 For small and/or obvious changes (say, about 25 change lines or less),
 feel free to submit a github pull request.
 
+Please submit pull requests against the 'development' branch, not master.
+
 For anything larger than that, please first file an
 [issue](https://github.com/jvirkki/libbloom/issues)
 describing the proposal.
