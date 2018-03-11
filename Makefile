@@ -105,8 +105,8 @@ $(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/$(SO_VERSIONED)
 	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
 $(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
-	$(COM) -I$(TOP) $(LIB) \
-	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
+	$(COM) -I$(TOP) \
+	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a $(LIB) -o $(BUILD)/test-basic
 
 $(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
