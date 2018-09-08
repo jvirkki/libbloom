@@ -153,6 +153,14 @@ void bloom_free(struct bloom * bloom)
 }
 
 
+int bloom_reset(struct bloom * bloom)
+{
+  if (!bloom->ready) return 1;
+  memset(bloom->bf, 0, bloom->bytes);
+  return 0;
+}
+
+
 const char * bloom_version()
 {
   return MAKESTRING(BLOOM_VERSION);
