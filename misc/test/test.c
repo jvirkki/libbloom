@@ -74,6 +74,7 @@ static int add_random(int entries, double error, int count,
   struct bloom bloom;
   assert(bloom_init(&bloom, entries, error) == 0);
   if (!quiet) { bloom_print(&bloom); }
+  assert(bloom_reset(&bloom) == 0);
 
   char block[elem_size];
   uint8_t * saved = NULL;
