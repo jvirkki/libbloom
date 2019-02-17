@@ -137,6 +137,14 @@ gcov:
 	    gcov -bf bloom.c)
 	@echo Remember to make clean to remove instrumented objects
 
+lcov: gcov
+	lcov --capture --directory build --output-file lcov.info
+	lcov --remove lcov.info xxhash.c --output-file lcov.info
+	genhtml lcov.info --no-branch-coverage \
+		--output-directory $(LCOV_OUTPUT_DIR)
+	rm -f lcov.info
+	$(MAKE) clean
+
 #
 # This target runs a test which creates a filter of capacity N and inserts
 # N elements, for N in 100,000 to 1,000,000 with an expected error of 0.001.
