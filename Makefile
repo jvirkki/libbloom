@@ -104,6 +104,11 @@ $(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/$(SO_VERSIONED)
 	(cd $(BUILD) && \
 	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
+$(BUILD)/test-perf: $(TESTDIR)/perf.c $(BUILD)/$(SO_VERSIONED)
+	$(COM) -I$(TOP) -c $(TESTDIR)/perf.c -o $(BUILD)/perf.o
+	(cd $(BUILD) && \
+	    $(COM) perf.o -L$(BUILD) $(RPATH) -lbloom -o test-perf)
+
 $(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
 	$(COM) -I$(TOP) \
 	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a $(LIB) -o $(BUILD)/test-basic
@@ -122,6 +127,9 @@ clean:
 test: $(BUILD)/test-libbloom $(BUILD)/test-basic
 	$(BUILD)/test-basic
 	$(BUILD)/test-libbloom
+
+perf: $(BUILD)/test-perf
+	$(BUILD)/test-perf
 
 vtest: $(BUILD)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
