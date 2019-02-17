@@ -111,9 +111,9 @@ int bloom_init(struct bloom * bloom, int entries, double error)
   bloom->hashes = (int)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
 
   bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
-  if (bloom->bf == NULL) {
+  if (bloom->bf == NULL) {                                   // LCOV_EXCL_START
     return 1;
-  }
+  }                                                          // LCOV_EXCL_STOP
 
   bloom->ready = 1;
   return 0;
