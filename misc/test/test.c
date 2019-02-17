@@ -184,6 +184,7 @@ static int basic_tests()
   int rv = 0;
 
   rv += basic();
+  rv += add_random(5002, 0.01, 5000, 0, 1, 32, 1);
   rv += add_random(10000, 0.1, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.01, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.001, 10000, 0, 1, 32, 1);
