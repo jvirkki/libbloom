@@ -26,7 +26,7 @@
 	* Version 1.3
 
 
-2016-10-18  Jyri J. Virkki  <jyri@virkki.com>
+2016-10-13  Jyri J. Virkki  <jyri@virkki.com>
 
 	* Version 1.2
 	* Deprecate bloom_init_size as the cache_size arg is no longer used.
