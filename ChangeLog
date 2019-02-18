@@ -1,8 +1,8 @@
-2019-XX-XX  Jyri J. Virkki  <jyri@virkki.com>
+2019-02-17  Jyri J. Virkki  <jyri@virkki.com>
 
 	* Version 1.6
 	* Added a simple bloom_reset() function.
-	* Peformance boost on membership test.
+	* Peformance boost on membership test if element not present.
 	* Test cleanup and coverage.
 
 
