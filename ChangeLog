@@ -1,3 +1,13 @@
+****-**-**  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 2.0
+	* The following incompatible changes are introduced in this
+	  new major release:
+	  - Removed deprecated bloom_init_size() function.
+	    It has not been needed since v1.1 but was kept around
+	    for compatibility.
+
+
 2019-02-17  Jyri J. Virkki  <jyri@virkki.com>
 
 	* Version 1.6

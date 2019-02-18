@@ -77,13 +77,6 @@ static int bloom_check_add(struct bloom * bloom,
 }
 
 
-int bloom_init_size(struct bloom * bloom, int entries, double error,
-                    unsigned int cache_size)
-{
-  return bloom_init(bloom, entries, error);
-}
-
-
 int bloom_init(struct bloom * bloom, int entries, double error)
 {
   bloom->ready = 0;
