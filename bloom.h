@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2017, Jyri J. Virkki
+ *  Copyright (c) 2012-2019, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -36,6 +36,8 @@ struct bloom
   double bpe;
   unsigned char * bf;
   int ready;
+  char major;
+  char minor;
 };
 
 
