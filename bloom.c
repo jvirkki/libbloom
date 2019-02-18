@@ -116,6 +116,10 @@ int bloom_init(struct bloom * bloom, int entries, double error)
   }                                                          // LCOV_EXCL_STOP
 
   bloom->ready = 1;
+
+  bloom->major = BLOOM_VERSION_MAJOR;
+  bloom->minor = BLOOM_VERSION_MINOR;
+
   return 0;
 }
 
@@ -135,6 +139,7 @@ int bloom_add(struct bloom * bloom, const void * buffer, int len)
 void bloom_print(struct bloom * bloom)
 {
   printf("bloom at %p\n", (void *)bloom);
+  printf(" ->version = %d.%d\n", bloom->major, bloom->minor);
   printf(" ->entries = %d\n", bloom->entries);
   printf(" ->error = %f\n", bloom->error);
   printf(" ->bits = %d\n", bloom->bits);
