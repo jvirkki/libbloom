@@ -72,14 +72,6 @@ int bloom_init(struct bloom * bloom, int entries, double error);
 
 
 /** ***************************************************************************
- * Deprecated, use bloom_init()
- *
- */
-int bloom_init_size(struct bloom * bloom, int entries, double error,
-                    unsigned int cache_size);
-
-
-/** ***************************************************************************
  * Check if the given element is in the bloom filter. Remember this may
  * return false positive if a collision occurred.
  *
