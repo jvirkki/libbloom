@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2017, Jyri J. Virkki
+ *  Copyright (c) 2012-2019, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -74,6 +74,7 @@ static int add_random(int entries, double error, int count,
   struct bloom bloom;
   assert(bloom_init(&bloom, entries, error) == 0);
   if (!quiet) { bloom_print(&bloom); }
+  assert(bloom_reset(&bloom) == 0);
 
   char block[elem_size];
   uint8_t * saved = NULL;
@@ -184,6 +185,7 @@ static int basic_tests()
   int rv = 0;
 
   rv += basic();
+  rv += add_random(5002, 0.01, 5000, 0, 1, 32, 1);
   rv += add_random(10000, 0.1, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.01, 10000, 0, 1, 32, 1);
   rv += add_random(10000, 0.001, 10000, 0, 1, 32, 1);

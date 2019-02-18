@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2017, Jyri J. Virkki
+# Copyright (c) 2012-2019, Jyri J. Virkki
 # All rights reserved.
 #
 # This file is under BSD license. See LICENSE file.
@@ -22,7 +22,7 @@
 #
 
 BLOOM_VERSION_MAJOR=1
-BLOOM_VERSION_MINOR=5
+BLOOM_VERSION_MINOR=6
 BLOOM_VERSION=$(BLOOM_VERSION_MAJOR).$(BLOOM_VERSION_MINOR)
 
 TOP := $(shell /bin/pwd)
@@ -104,9 +104,14 @@ $(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/$(SO_VERSIONED)
 	(cd $(BUILD) && \
 	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
 
+$(BUILD)/test-perf: $(TESTDIR)/perf.c $(BUILD)/$(SO_VERSIONED)
+	$(COM) -I$(TOP) -c $(TESTDIR)/perf.c -o $(BUILD)/perf.o
+	(cd $(BUILD) && \
+	    $(COM) perf.o -L$(BUILD) $(RPATH) -lbloom -o test-perf)
+
 $(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
-	$(COM) -I$(TOP) $(LIB) \
-	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a -o $(BUILD)/test-basic
+	$(COM) -I$(TOP) \
+	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a $(LIB) -o $(BUILD)/test-basic
 
 $(BUILD)/%.o: %.c
 	mkdir -p $(BUILD)
@@ -123,6 +128,9 @@ test: $(BUILD)/test-libbloom $(BUILD)/test-basic
 	$(BUILD)/test-basic
 	$(BUILD)/test-libbloom
 
+perf: $(BUILD)/test-perf
+	$(BUILD)/test-perf
+
 vtest: $(BUILD)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
 	    $(BUILD)/test-libbloom
@@ -136,6 +144,14 @@ gcov:
 	    ./test-libbloom && \
 	    gcov -bf bloom.c)
 	@echo Remember to make clean to remove instrumented objects
+
+lcov: gcov
+	lcov --capture --directory build --output-file lcov.info
+	lcov --remove lcov.info xxhash.c --output-file lcov.info
+	genhtml lcov.info --no-branch-coverage \
+		--output-directory $(LCOV_OUTPUT_DIR)
+	rm -f lcov.info
+	$(MAKE) clean
 
 #
 # This target runs a test which creates a filter of capacity N and inserts

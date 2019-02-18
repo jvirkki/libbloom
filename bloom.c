@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2017, Jyri J. Virkki
+ *  Copyright (c) 2012-2019, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -63,6 +63,9 @@ static int bloom_check_add(struct bloom * bloom,
     x = (a + i*b) % bloom->bits;
     if (test_bit_set_bit(bloom->bf, x, add)) {
       hits++;
+    } else if (!add) {
+      // Don't care about the presence of all the bits. Just our own.
+      return 0;
     }
   }
 
@@ -108,9 +111,9 @@ int bloom_init(struct bloom * bloom, int entries, double error)
   bloom->hashes = (int)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
 
   bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
-  if (bloom->bf == NULL) {
+  if (bloom->bf == NULL) {                                   // LCOV_EXCL_START
     return 1;
-  }
+  }                                                          // LCOV_EXCL_STOP
 
   bloom->ready = 1;
   return 0;
@@ -147,6 +150,14 @@ void bloom_free(struct bloom * bloom)
     free(bloom->bf);
   }
   bloom->ready = 0;
+}
+
+
+int bloom_reset(struct bloom * bloom)
+{
+  if (!bloom->ready) return 1;
+  memset(bloom->bf, 0, bloom->bytes);
+  return 0;
 }
 
 

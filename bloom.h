@@ -79,7 +79,7 @@ int bloom_init_size(struct bloom * bloom, int entries, double error,
 
 /** ***************************************************************************
  * Check if the given element is in the bloom filter. Remember this may
- * return false positive if a collision occured.
+ * return false positive if a collision occurred.
  *
  * Parameters:
  * -----------
@@ -139,6 +139,23 @@ void bloom_print(struct bloom * bloom);
  *
  */
 void bloom_free(struct bloom * bloom);
+
+/** ***************************************************************************
+ * Erase internal storage.
+ *
+ * Erases all elements. Upon return, the bloom struct returns to its initial
+ * (initialized) state.
+ *
+ * Parameters:
+ * -----------
+ *     bloom  - Pointer to an allocated struct bloom (see above).
+ *
+ * Return:
+ *     0 - on success
+ *     1 - on failure
+ *
+ */
+int bloom_reset(struct bloom * bloom);
 
 
 /** ***************************************************************************

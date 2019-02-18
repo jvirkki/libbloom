@@ -1,0 +1,17 @@
+
+development
+-----------
+Contains the latest work in progress.
+Should be stable, but might not be.
+
+
+master
+------
+Contains the most recent released version.
+
+No direct PRs to master. On release, development is merged to master.
+
+
+maintenance_v1
+--------------
+Maintenance branch for 1.x releases.

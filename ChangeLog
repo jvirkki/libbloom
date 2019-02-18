@@ -1,0 +1,57 @@
+2019-02-17  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.6
+	* Added a simple bloom_reset() function.
+	* Peformance boost on membership test if element not present.
+	* Test cleanup and coverage.
+
+
+2017-06-08  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.5
+	* Make the bloom filter minimum capacity be 1000 elements.
+	* Build cleanup.
+	* Fix FTBFS issue on GNU/kFreeBSD and Hurd.
+
+
+2017-02-23  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.4
+	* Build cleanup on Solaris and OpenBSD.
+	* Debian packaging support changes.
+
+
+2016-10-18  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.3
+
+
+2016-10-13  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.2
+	* Deprecate bloom_init_size as the cache_size arg is no longer used.
+	* Remove the buckets optimization introduced earlier.
+	  While faster, it caused collisions to fluctuate, sometimes well
+	  over the specified error rate.
+	* Export the c function symbols for the C++ compiler.
+	* Build static and dynamic libraries.
+	* Build cleanup on OpenBSD, Solaris.
+	* Test cleanup.
+
+
+2015-09-18  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.1
+	* Preserved some reports.
+
+
+2015-09-17  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 1.0
+	* Calling the work so far as version 1.0
+
+
+2012-06-16  Jyri J. Virkki  <jyri@virkki.com>
+
+	* Version 0.1
+	* Initial working code.
