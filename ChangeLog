@@ -6,6 +6,10 @@
 	  - Removed deprecated bloom_init_size() function.
 	    It has not been needed since v1.1 but was kept around
 	    for compatibility.
+	  - Types within struct bloom have changed. Any client code
+	    which accesses these directly may need to be updated.
+	* Deprecated bloom_init(). Please migrate to bloom_init2().
+	  - bloom_init() will not be removed until at least v3.0.
 
 
 2019-02-17  Jyri J. Virkki  <jyri@virkki.com>

@@ -24,20 +24,20 @@ struct bloom
   // These fields are part of the public interface of this structure.
   // Client code may read these values if desired. Client code MUST NOT
   // modify any of these.
-  int entries;
+  unsigned int entries;
+  unsigned int bits;
+  unsigned int bytes;
+  unsigned char hashes;
   double error;
-  int bits;
-  int bytes;
-  int hashes;
 
   // Fields below are private to the implementation. These may go away or
   // change incompatibly at any moment. Client code MUST NOT access or rely
   // on these.
+  unsigned char ready;
+  unsigned char major;
+  unsigned char minor;
   double bpe;
   unsigned char * bf;
-  int ready;
-  char major;
-  char minor;
 };
 
 
@@ -66,6 +66,14 @@ struct bloom
  * -------
  *     0 - on success
  *     1 - on failure
+ *
+ */
+int bloom_init2(struct bloom * bloom, unsigned int entries, double error);
+
+
+/**
+ * DEPRECATED.
+ * Kept for compatibility with libbloom v.1. To be removed in v3.0.
  *
  */
 int bloom_init(struct bloom * bloom, int entries, double error);
@@ -133,6 +141,7 @@ void bloom_print(struct bloom * bloom);
  *
  */
 void bloom_free(struct bloom * bloom);
+
 
 /** ***************************************************************************
  * Erase internal storage.

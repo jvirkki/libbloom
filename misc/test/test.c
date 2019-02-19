@@ -63,11 +63,11 @@ static int basic()
  * into it to see if collission rates are within expectations.
  *
  */
-static int add_random(int entries, double error, int count,
+static int add_random(unsigned int entries, double error, int count,
                       int quiet, int check_error, uint8_t elem_size, int validate)
 {
   if (!quiet) {
-    printf("----- add_random(%d, %f, %d, %d, %d, %d, %d) -----\n",
+    printf("----- add_random(%u, %f, %d, %d, %d, %d, %d) -----\n",
            entries, error, count, quiet, check_error, elem_size, validate);
   }
 
@@ -108,11 +108,11 @@ static int add_random(int entries, double error, int count,
   double er = (double)collisions / (double)count;
 
   if (!quiet) {
-    printf("entries: %d, error: %f, count: %d, coll: %d, error: %f, "
-           "bytes: %d\n",
+    printf("entries: %u, error: %f, count: %d, coll: %d, error: %f, "
+           "bytes: %u\n",
            entries, error, count, collisions, er, bloom.bytes);
   } else {
-    printf("%d %f %d %d %f %d\n",
+    printf("%u %f %d %d %f %u\n",
            entries, error, count, collisions, er, bloom.bytes);
   }
 
@@ -165,7 +165,7 @@ static int perf_loop(int entries, int count)
   printf("Added %d elements of size %d, took %d ms (collisions=%d)\n",
          count, (int)sizeof(int), (int)(after - before), collisions);
 
-  printf("%d,%d,%ld\n", entries, bloom.bytes, after - before);
+  printf("%d,%u,%ld\n", entries, bloom.bytes, after - before);
 
   bloom_print(&bloom);
   bloom_free(&bloom);
