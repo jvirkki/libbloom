@@ -8,8 +8,12 @@
 	    for compatibility.
 	  - Types within struct bloom have changed. Any client code
 	    which accesses these directly may need to be updated.
+	    Typical client code which does not access the struct bloom
+	    fields directly is not impacted by the change.
 	* Deprecated bloom_init(). Please migrate to bloom_init2().
-	  - bloom_init() will not be removed until at least v3.0.
+	  - bloom_init() will not be removed until at least v3.0
+	    so existing code will continue to work as-is. But to take
+	    advantage of the higher size limits, migrate to bloom_init2().
 
 
 2019-02-17  Jyri J. Virkki  <jyri@virkki.com>
