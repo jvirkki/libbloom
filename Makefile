@@ -4,14 +4,11 @@
 #
 # This file is under BSD license. See LICENSE file.
 #
-# By default, builds optimized 64bit libbloom (under ./build)
 # Requires GNU Make, so invoke appropriately (make or gmake)
 #
 # Other build options:
 #
 #   DEBUG=1 make        to build debug instead of optimized
-#   BITS=32 make        to build 32bit library
-#   BITS=default make   to build platform default bitness (32 or 64)
 #
 # Other build targets:
 #
@@ -23,127 +20,119 @@
 
 BLOOM_VERSION_MAJOR=2
 BLOOM_VERSION_MINOR=0
-BLOOM_VERSION=$(BLOOM_VERSION_MAJOR).$(BLOOM_VERSION_MINOR)
-
-TOP := $(shell /bin/pwd)
-BUILD_OS := $(shell uname)
-
-BUILD=$(TOP)/build
-INC=-I$(TOP) -I$(TOP)/murmur2
-LIB=-lm
-COM=${CC} $(CFLAGS) $(CPPFLAGS) -Wall ${OPT} ${MM} -std=c99 -fPIC \
-	-DBLOOM_VERSION=$(BLOOM_VERSION) \
-	-DBLOOM_VERSION_MAJOR=$(BLOOM_VERSION_MAJOR) \
-	-DBLOOM_VERSION_MINOR=$(BLOOM_VERSION_MINOR)
-
-TESTDIR=$(TOP)/misc/test
-
-ifeq ($(BITS),)
-MM=-m64
-else ifeq ($(BITS),64)
-MM=-m64
-else ifeq ($(BITS),32)
-MM=-m32
-else ifeq ($(BITS),default)
-MM=
-else
-MM=$(BITS)
-endif
 
 #
 # Shared library names - these definitions work on most platforms but can
 # be overridden in the platform-specific sections below.
 #
+BLOOM_VERSION=$(BLOOM_VERSION_MAJOR).$(BLOOM_VERSION_MINOR)
 BLOOM_SONAME=libbloom.so.$(BLOOM_VERSION_MAJOR)
 SO_VERSIONED=libbloom.so.$(BLOOM_VERSION)
 LD_SONAME=-Wl,-soname,$(BLOOM_SONAME)
 SO=so
 
 
+TOP := $(shell /bin/pwd)
+BUILD_OS := $(shell uname)
+BUILD_DIR=$(TOP)/build
+TESTDIR=$(TOP)/misc/test
+
+INC+=-I$(TOP) -I$(TOP)/murmur2
+LIB+=-lm
+CFLAGS+=-std=c99
+CFLAGS+=-Wall
+CFLAGS+=-fPIC
+CFLAGS+=-DBLOOM_VERSION=$(BLOOM_VERSION)
+CFLAGS+=-DBLOOM_VERSION_MAJOR=$(BLOOM_VERSION_MAJOR)
+CFLAGS+=-DBLOOM_VERSION_MINOR=$(BLOOM_VERSION_MINOR)
+
+
+ifeq ($(DEBUG),1)
+OPT=-g $(DEBUGOPT)
+else
+OPT?=-O3
+endif
+
+
 ifeq ($(BUILD_OS),$(filter $(BUILD_OS), GNU/kFreeBSD GNU Linux))
-RPATH=-Wl,-rpath,$(BUILD)
+RPATH=-Wl,-rpath,$(BUILD_DIR)
 endif
 
 ifeq ($(BUILD_OS),SunOS)
-RPATH=-R$(BUILD)
+RPATH=-R$(BUILD_DIR)
 CC=gcc
 endif
 
 ifeq ($(BUILD_OS),OpenBSD)
-RPATH=-R$(BUILD)
+RPATH=-R$(BUILD_DIR)
 endif
 
 ifeq ($(BUILD_OS),Darwin)
-MAC=-install_name $(BUILD)/libbloom.dylib \
+MAC=-install_name $(BUILD_DIR)/libbloom.dylib \
 	-compatibility_version $(BLOOM_VERSION_MAJOR) \
 	-current_version $(BLOOM_VERSION)
-RPATH=-Xlinker -rpath -Xlinker $(BUILD)
+RPATH=-Xlinker -rpath -Xlinker $(BUILD_DIR)
 SO=dylib
 BLOOM_SONAME=libbloom.$(BLOOM_VERSION_MAJOR).$(SO)
 SO_VERSIONED=libbloom.$(BLOOM_VERSION).$(SO)
 LD_SONAME=
 endif
 
-ifeq ($(DEBUG),1)
-OPT=-g $(DEBUGOPT)
-else
-OPT=-O3
-endif
 
 
-all: $(BUILD)/$(SO_VERSIONED) $(BUILD)/libbloom.a
+all: $(BUILD_DIR)/$(SO_VERSIONED) $(BUILD_DIR)/libbloom.a
 
-$(BUILD)/$(SO_VERSIONED): $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
-	(cd $(BUILD) && \
-	    $(COM) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
+$(BUILD_DIR)/$(SO_VERSIONED): $(BUILD_DIR)/murmurhash2.o $(BUILD_DIR)/bloom.o
+	(cd $(BUILD_DIR) && \
+	    $(CC) $(OPT) $(LDFLAGS) bloom.o murmurhash2.o -shared $(LIB) $(MAC) \
 		$(LD_SONAME) -o $(SO_VERSIONED) && \
 		rm -f $(BLOOM_SONAME) && ln -s $(SO_VERSIONED) $(BLOOM_SONAME) && \
 		rm -f libbloom.$(SO) && ln -s $(BLOOM_SONAME) libbloom.$(SO))
 
-$(BUILD)/libbloom.a: $(BUILD)/murmurhash2.o $(BUILD)/bloom.o
-	(cd $(BUILD) && ar rcs libbloom.a bloom.o murmurhash2.o)
+$(BUILD_DIR)/libbloom.a: $(BUILD_DIR)/murmurhash2.o $(BUILD_DIR)/bloom.o
+	(cd $(BUILD_DIR) && ar rcs libbloom.a bloom.o murmurhash2.o)
 
-$(BUILD)/test-libbloom: $(TESTDIR)/test.c $(BUILD)/$(SO_VERSIONED)
-	$(COM) -I$(TOP) -c $(TESTDIR)/test.c -o $(BUILD)/test.o
-	(cd $(BUILD) && \
-	    $(COM) test.o -L$(BUILD) $(RPATH) -lbloom -o test-libbloom)
+$(BUILD_DIR)/test-libbloom: $(TESTDIR)/test.c $(BUILD_DIR)/$(SO_VERSIONED)
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c $(TESTDIR)/test.c -o $(BUILD_DIR)/test.o
+	(cd $(BUILD_DIR) && \
+	    $(CC) $(CFLAGS) $(OPT) -L$(BUILD_DIR) $(RPATH) test.o -lbloom -o test-libbloom)
 
-$(BUILD)/test-perf: $(TESTDIR)/perf.c $(BUILD)/$(SO_VERSIONED)
-	$(COM) -I$(TOP) -c $(TESTDIR)/perf.c -o $(BUILD)/perf.o
-	(cd $(BUILD) && \
-	    $(COM) perf.o -L$(BUILD) $(RPATH) -lbloom -o test-perf)
+$(BUILD_DIR)/test-perf: $(TESTDIR)/perf.c $(BUILD_DIR)/$(SO_VERSIONED)
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c $(TESTDIR)/perf.c -o $(BUILD_DIR)/perf.o
+	(cd $(BUILD_DIR) && \
+	    $(CC) perf.o -L$(BUILD_DIR) $(RPATH) -lbloom -o test-perf)
 
-$(BUILD)/test-basic: $(TESTDIR)/basic.c $(BUILD)/libbloom.a
-	$(COM) -I$(TOP) \
-	    $(TESTDIR)/basic.c $(BUILD)/libbloom.a $(LIB) -o $(BUILD)/test-basic
+$(BUILD_DIR)/test-basic: $(TESTDIR)/basic.c $(BUILD_DIR)/libbloom.a
+	$(CC) $(CFLAGS) $(OPT) $(INC) \
+	    $(TESTDIR)/basic.c $(BUILD_DIR)/libbloom.a $(LIB) -o $(BUILD_DIR)/test-basic
 
-$(BUILD)/%.o: %.c
-	mkdir -p $(BUILD)
-	$(COM) $(INC) -c $< -o $@
+$(BUILD_DIR)/%.o: %.c
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c $< -o $@
 
-$(BUILD)/murmurhash2.o: murmur2/MurmurHash2.c murmur2/murmurhash2.h
-	mkdir -p $(BUILD)
-	$(COM) $(INC) -c murmur2/MurmurHash2.c -o $(BUILD)/murmurhash2.o
+$(BUILD_DIR)/murmurhash2.o: murmur2/MurmurHash2.c murmur2/murmurhash2.h
+	mkdir -p $(BUILD_DIR)
+	$(CC) $(CFLAGS) $(OPT) $(INC) -c murmur2/MurmurHash2.c -o $(BUILD_DIR)/murmurhash2.o
 
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD_DIR)
 
-test: $(BUILD)/test-libbloom $(BUILD)/test-basic
-	$(BUILD)/test-basic
-	$(BUILD)/test-libbloom
+test: $(BUILD_DIR)/test-libbloom $(BUILD_DIR)/test-basic
+	$(BUILD_DIR)/test-basic
+	$(BUILD_DIR)/test-libbloom
 
-perf: $(BUILD)/test-perf
-	$(BUILD)/test-perf
+perf: $(BUILD_DIR)/test-perf
+	$(BUILD_DIR)/test-perf
 
-vtest: $(BUILD)/test-libbloom
+vtest: $(BUILD_DIR)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
-	    $(BUILD)/test-libbloom
+	    $(BUILD_DIR)/test-libbloom
 
 gcov:
 	$(MAKE) clean
 	DEBUG=1 DEBUGOPT="-fprofile-arcs -ftest-coverage" \
-	    $(MAKE) $(BUILD)/test-libbloom
-	(cd $(BUILD) && \
+	    $(MAKE) $(BUILD_DIR)/test-libbloom
+	(cd $(BUILD_DIR) && \
 	    cp ../*.c . && \
 	    ./test-libbloom && \
 	    gcov -bf bloom.c)
@@ -151,8 +140,9 @@ gcov:
 
 lcov: gcov
 	lcov --capture --directory build --output-file lcov.info
-	lcov --remove lcov.info xxhash.c --output-file lcov.info
-	genhtml lcov.info --no-branch-coverage \
+	lcov --remove lcov.info MurmurHash2.c --output-file lcov.info
+	lcov --remove lcov.info test.c --output-file lcov.info
+	genhtml lcov.info \
 		--output-directory $(LCOV_OUTPUT_DIR)
 	rm -f lcov.info
 	$(MAKE) clean
@@ -166,8 +156,8 @@ lcov: gcov
 # WARNING: This can take a very long time (on a slow machine, multiple days)
 # to run.
 #
-collision_test: $(BUILD)/test-libbloom
-	$(BUILD)/test-libbloom -G 100000 1000000 10 0.001 \
+collision_test: $(BUILD_DIR)/test-libbloom
+	$(BUILD_DIR)/test-libbloom -G 100000 1000000 10 0.001 \
 	    | tee collision_data_v$(BLOOM_VERSION)
 
 #
@@ -179,7 +169,7 @@ collision_test: $(BUILD)/test-libbloom
 release_test:
 	$(MAKE) test
 	$(MAKE) vtest
-	$(BUILD)/test-libbloom -G 100000 1000000 50000 0.001 \
+	$(BUILD_DIR)/test-libbloom -G 100000 1000000 50000 0.001 \
 	    | tee short_coll_data
 	gzip short_coll_data
 	./misc/collisions/dograph short_coll_data.gz
