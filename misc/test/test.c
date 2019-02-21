@@ -36,10 +36,13 @@ static int basic()
 
   assert(bloom_init(&bloom, 0, 1.0) == 1);
   assert(bloom_init(&bloom, 10, 0) == 1);
+  assert(bloom_init(&bloom, 1001, 0) == 1);
   assert(bloom.ready == 0);
   assert(bloom_add(&bloom, "hello world", 11) == -1);
   assert(bloom_check(&bloom, "hello world", 11) == -1);
+  bloom_print(&bloom);
   bloom_free(&bloom);
+  assert(bloom_reset(&bloom) == 1);
 
   assert(bloom_init(&bloom, 1002, 0.1) == 0);
   assert(bloom.ready == 1);
