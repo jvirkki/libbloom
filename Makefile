@@ -131,7 +131,7 @@ perf: $(BINDIR)/test-perf
 
 vtest: $(BINDIR)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
-	    $(BINDIR)/test-libbloom
+	    --track-origins=yes $(BINDIR)/test-libbloom
 
 gcov:
 	$(MAKE) clean
