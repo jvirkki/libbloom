@@ -10,6 +10,7 @@
 	    which accesses these directly may need to be updated.
 	    Typical client code which does not access the struct bloom
 	    fields directly is not impacted by the change.
+	* Added bloom_save() and bloom_load()
 	* Deprecated bloom_init(). Please migrate to bloom_init2().
 	  - bloom_init() will not be removed until at least v3.0
 	    so existing code will continue to work as-is. But to take
