@@ -25,6 +25,72 @@
 
 
 /** ***************************************************************************
+ * Testing bloom_load with various failure cases.
+ *
+ */
+static int load_tests()
+{
+  char * filename = "/tmp/libbloom.test";
+  struct bloom bloom;
+  struct bloom bloom2;
+  uint64_t n;
+  int fd;
+
+  printf("----- bloom_load tests -----\n");
+
+  memset(&bloom, 0, sizeof(struct bloom));
+  memset(&bloom2, 0, sizeof(struct bloom));
+
+  bloom_init2(&bloom, 1000000, 0.1);
+  for (n = 1; n < 1000; n++) {
+    bloom_add(&bloom, &n, sizeof(uint64_t));
+  }
+
+  // BLOOM_MAGIC too short
+  bloom_save(&bloom, filename);
+  truncate(filename, 4);
+  assert(bloom_load(&bloom2, filename) == 4);
+
+  // BLOOM_MAGIC incorrect
+  fd = open(filename, O_WRONLY | O_CREAT, 0644);
+  write(fd, "lobbliim3", 9);
+  close(fd);
+  assert(bloom_load(&bloom2, filename) == 5);
+
+  // struct size not present
+  bloom_save(&bloom, filename);
+  truncate(filename, 10);
+  assert(bloom_load(&bloom2, filename) == 6);
+
+  // struct size incorrect
+  fd = open(filename, O_WRONLY | O_CREAT, 0644);
+  write(fd, "libbloom2", 9);
+  uint16_t size = sizeof(struct bloom) - 2;
+  write(fd, &size, sizeof(uint16_t));
+  close(fd);
+  assert(bloom_load(&bloom2, filename) == 7);
+
+  // struct content too short
+  bloom_save(&bloom, filename);
+  truncate(filename, 18);
+  assert(bloom_load(&bloom2, filename) == 8);
+
+  // incompatible version
+  bloom.major++;
+  bloom_save(&bloom, filename);
+  assert(bloom_load(&bloom2, filename) == 9);
+  bloom.major--;
+
+  // data buffer too short
+  bloom_save(&bloom, filename);
+  truncate(filename, 75);
+  assert(bloom_load(&bloom2, filename) == 11);
+
+  unlink(filename);
+}
+
+
+/** ***************************************************************************
  * A few simple tests to check if it works at all.
  *
  */
@@ -33,6 +99,15 @@ static int basic()
   printf("----- basic -----\n");
 
   struct bloom bloom;
+
+  assert(bloom_save(&bloom, NULL) == 1);
+  assert(bloom_save(&bloom, "") == 1);
+  assert(bloom_save(&bloom, "/no-such-directory/foo") == 1);
+
+  assert(bloom_load(&bloom, NULL) == 1);
+  assert(bloom_load(&bloom, "") == 1);
+  assert(bloom_load(NULL, "hi") == 2);
+  assert(bloom_load(&bloom, "/no-such-directory/foo") == 3);
 
   assert(bloom_init(&bloom, 0, 1.0) == 1);
   assert(bloom_init(&bloom, 10, 0) == 1);
@@ -57,6 +132,8 @@ static int basic()
   assert(bloom_check(&bloom, "hello", 5) == 1);
   bloom_free(&bloom);
 
+  load_tests();
+
   return 0;
 }
 
@@ -75,6 +152,7 @@ static int add_random(unsigned int entries, double error, int count,
   }
 
   struct bloom bloom;
+  struct bloom bloom2;
   assert(bloom_init(&bloom, entries, error) == 0);
   if (!quiet) { bloom_print(&bloom); }
   assert(bloom_reset(&bloom) == 0);
@@ -124,9 +202,12 @@ static int add_random(unsigned int entries, double error, int count,
     exit(1);
   }
 
+  bloom_save(&bloom, "/tmp/bloom.test");
+  bloom_load(&bloom2, "/tmp/bloom.test");
+
   if (validate) {
     for (n = 0; n < count; n++) {
-      if (!bloom_check(&bloom, saved + (n * elem_size), elem_size)) {
+      if (!bloom_check(&bloom2, saved + (n * elem_size), elem_size)) {
         printf("error: data saved in filter is not there!\n");
         exit(1);
       }
@@ -134,6 +215,7 @@ static int add_random(unsigned int entries, double error, int count,
   }
 
   bloom_free(&bloom);
+  bloom_free(&bloom2);
   if (saved) { free(saved); }
   return 0;
 }
