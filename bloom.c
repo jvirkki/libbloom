@@ -25,7 +25,7 @@
 
 #define MAKESTRING(n) STRING(n)
 #define STRING(n) #n
-
+#define BLOOM_MAGIC "libbloom2"
 
 inline static int test_bit_set_bit(unsigned char * buf,
                                    unsigned int bit, int set_bit)
@@ -86,7 +86,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
 int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
 {
-  bloom->ready = 0;
+  memset(bloom, 0, sizeof(struct bloom));
 
   if (entries < 1000 || error == 0) {
     return 1;
@@ -168,6 +168,111 @@ int bloom_reset(struct bloom * bloom)
   if (!bloom->ready) return 1;
   memset(bloom->bf, 0, bloom->bytes);
   return 0;
+}
+
+
+int bloom_save(struct bloom * bloom, char * filename)
+{
+  if (filename == NULL || filename[0] == 0) {
+    return 1;
+  }
+
+  int fd = open(filename, O_WRONLY | O_CREAT, 0644);
+  if (fd < 0) {
+    return 1;
+  }
+
+  ssize_t out = write(fd, BLOOM_MAGIC, strlen(BLOOM_MAGIC));
+  if (out != strlen(BLOOM_MAGIC)) { goto save_error; }        // LCOV_EXCL_LINE
+
+  uint16_t size = sizeof(struct bloom);
+  out = write(fd, &size, sizeof(uint16_t));
+  if (out != sizeof(uint16_t)) { goto save_error; }           // LCOV_EXCL_LINE
+
+  out = write(fd, bloom, sizeof(struct bloom));
+  if (out != sizeof(struct bloom)) { goto save_error; }       // LCOV_EXCL_LINE
+
+  out = write(fd, bloom->bf, bloom->bytes);
+  if (out != bloom->bytes) { goto save_error; }               // LCOV_EXCL_LINE
+
+  close(fd);
+  return 0;
+                                                             // LCOV_EXCL_START
+ save_error:
+  close(fd);
+  return 1;
+                                                             // LCOV_EXCL_STOP
+}
+
+
+int bloom_load(struct bloom * bloom, char * filename)
+{
+  int rv = 0;
+
+  if (filename == NULL || filename[0] == 0) { return 1; }
+  if (bloom == NULL) { return 2; }
+
+  memset(bloom, 0, sizeof(struct bloom));
+
+  int fd = open(filename, O_RDONLY);
+  if (fd < 0) { return 3; }
+
+  char line[30];
+  memset(line, 0, 30);
+  ssize_t in = read(fd, line, strlen(BLOOM_MAGIC));
+
+  if (in != strlen(BLOOM_MAGIC)) {
+    rv = 4;
+    goto load_error;
+  }
+
+  if (strncmp(line, BLOOM_MAGIC, strlen(BLOOM_MAGIC))) {
+    rv = 5;
+    goto load_error;
+  }
+
+  uint16_t size;
+  in = read(fd, &size, sizeof(uint16_t));
+  if (in != sizeof(uint16_t)) {
+    rv = 6;
+    goto load_error;
+  }
+
+  if (size != sizeof(struct bloom)) {
+    rv = 7;
+    goto load_error;
+  }
+
+  in = read(fd, bloom, sizeof(struct bloom));
+  if (in != sizeof(struct bloom)) {
+    rv = 8;
+    goto load_error;
+  }
+
+  bloom->bf = NULL;
+  if (bloom->major != BLOOM_VERSION_MAJOR) {
+    rv = 9;
+    goto load_error;
+  }
+
+  bloom->bf = (unsigned char *)malloc(bloom->bytes);
+  if (bloom->bf == NULL) { rv = 10; goto load_error; }        // LCOV_EXCL_LINE
+
+  in = read(fd, bloom->bf, bloom->bytes);
+  if (in != bloom->bytes) {
+    rv = 11;
+    free(bloom->bf);
+    bloom->bf = NULL;
+    goto load_error;
+  }
+
+  close(fd);
+  return rv;
+
+ load_error:
+  close(fd);
+  bloom->ready = 0;
+  return rv;
 }
 
 

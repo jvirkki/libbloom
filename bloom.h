@@ -162,6 +162,40 @@ int bloom_reset(struct bloom * bloom);
 
 
 /** ***************************************************************************
+ * Save a bloom filter to a file.
+ *
+ * Parameters:
+ * -----------
+ *     bloom    - Pointer to an allocated struct bloom (see above).
+ *     filename - Create (or overwrite) bloom data to this file.
+ *
+ * Return:
+ *     0 - on success
+ *     1 - on failure
+ *
+ */
+int bloom_save(struct bloom * bloom, char * filename);
+
+
+/** ***************************************************************************
+ * Load a bloom filter from a file.
+ *
+ * This functions loads a file previously saved with bloom_save().
+ *
+ * Parameters:
+ * -----------
+ *     bloom    - Pointer to an allocated struct bloom (see above).
+ *     filename - Load bloom filter data from this file.
+ *
+ * Return:
+ *     0   - on success
+ *     > 0 - on failure
+ *
+ */
+int bloom_load(struct bloom * bloom, char * filename);
+
+
+/** ***************************************************************************
  * Returns version string compiled into library.
  *
  * Return: version string
