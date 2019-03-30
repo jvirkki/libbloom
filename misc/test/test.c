@@ -86,6 +86,7 @@ static int load_tests()
   truncate(filename, 75);
   assert(bloom_load(&bloom2, filename) == 11);
 
+  bloom_free(&bloom);
   unlink(filename);
 }
 
