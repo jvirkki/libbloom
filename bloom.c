@@ -88,7 +88,7 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 {
   bloom->ready = 0;
 
-  if (entries < 1000 || error == 0) {
+  if (entries < 1000 || error == 0 || error >= 1) {
     return 1;
   }
 
