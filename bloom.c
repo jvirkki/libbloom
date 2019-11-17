@@ -88,7 +88,7 @@ int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
 {
   memset(bloom, 0, sizeof(struct bloom));
 
-  if (entries < 1000 || error == 0) {
+  if (entries < 1000 || error == 0 || error >= 1) {
     return 1;
   }
 
