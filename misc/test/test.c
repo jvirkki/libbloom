@@ -110,6 +110,9 @@ static int basic()
   assert(bloom_load(NULL, "hi") == 2);
   assert(bloom_load(&bloom, "/no-such-directory/foo") == 3);
 
+  assert(bloom_init(&bloom, 5000, 1.0) == 1);
+  assert(bloom_init(&bloom, 5000, 1.1) == 1);
+  assert(bloom_init(&bloom, 5000, -1.0) == 1);
   assert(bloom_init(&bloom, 0, 1.0) == 1);
   assert(bloom_init(&bloom, 10, 0) == 1);
   assert(bloom_init(&bloom, 1001, 0) == 1);
