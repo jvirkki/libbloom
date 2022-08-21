@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2012-2019, Jyri J. Virkki
+# Copyright (c) 2012-2022, Jyri J. Virkki
 # All rights reserved.
 #
 # This file is under BSD license. See LICENSE file.
@@ -39,7 +39,6 @@ TESTDIR=$(TOP)/misc/test
 
 INC+=-I$(TOP) -I$(TOP)/murmur2
 LIB+=-lm
-CFLAGS+=-std=c99
 CFLAGS+=-Wall
 CFLAGS+=-fPIC
 CFLAGS+=-DBLOOM_VERSION=$(BLOOM_VERSION)
