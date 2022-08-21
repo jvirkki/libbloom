@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2019, Jyri J. Virkki
+ *  Copyright (c) 2012-2022, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -28,7 +28,7 @@
  * Testing bloom_load with various failure cases.
  *
  */
-static int load_tests()
+static void load_tests()
 {
   char * filename = "/tmp/libbloom.test";
   struct bloom bloom;
