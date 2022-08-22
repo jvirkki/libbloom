@@ -109,7 +109,7 @@ int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
     bloom->bytes = bloom->bits / 8;
   }
 
-  bloom->hashes = (unsigned char)ceil(0.693147180559945 * bloom->bpe);  // ln(2)
+  bloom->hashes = (unsigned char)ceil(0.693147180559945 * bloom->bpe); // ln(2)
 
   bloom->bf = (unsigned char *)calloc(bloom->bytes, sizeof(unsigned char));
   if (bloom->bf == NULL) {                                   // LCOV_EXCL_START
@@ -183,17 +183,17 @@ int bloom_save(struct bloom * bloom, char * filename)
   }
 
   ssize_t out = write(fd, BLOOM_MAGIC, strlen(BLOOM_MAGIC));
-  if (out != strlen(BLOOM_MAGIC)) { goto save_error; }        // LCOV_EXCL_LINE
+  if (out != strlen(BLOOM_MAGIC)) { goto save_error; }       // LCOV_EXCL_LINE
 
   uint16_t size = sizeof(struct bloom);
   out = write(fd, &size, sizeof(uint16_t));
-  if (out != sizeof(uint16_t)) { goto save_error; }           // LCOV_EXCL_LINE
+  if (out != sizeof(uint16_t)) { goto save_error; }          // LCOV_EXCL_LINE
 
   out = write(fd, bloom, sizeof(struct bloom));
-  if (out != sizeof(struct bloom)) { goto save_error; }       // LCOV_EXCL_LINE
+  if (out != sizeof(struct bloom)) { goto save_error; }      // LCOV_EXCL_LINE
 
   out = write(fd, bloom->bf, bloom->bytes);
-  if (out != bloom->bytes) { goto save_error; }               // LCOV_EXCL_LINE
+  if (out != bloom->bytes) { goto save_error; }              // LCOV_EXCL_LINE
 
   close(fd);
   return 0;
@@ -256,7 +256,7 @@ int bloom_load(struct bloom * bloom, char * filename)
   }
 
   bloom->bf = (unsigned char *)malloc(bloom->bytes);
-  if (bloom->bf == NULL) { rv = 10; goto load_error; }        // LCOV_EXCL_LINE
+  if (bloom->bf == NULL) { rv = 10; goto load_error; }       // LCOV_EXCL_LINE
 
   in = read(fd, bloom->bf, bloom->bytes);
   if (in != bloom->bytes) {
