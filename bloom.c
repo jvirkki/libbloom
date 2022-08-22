@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2019, Jyri J. Virkki
+ *  Copyright (c) 2012-2022, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -273,6 +273,48 @@ int bloom_load(struct bloom * bloom, char * filename)
   close(fd);
   bloom->ready = 0;
   return rv;
+}
+
+
+int bloom_merge(struct bloom * bloom_dest, struct bloom * bloom_src)
+{
+  if (bloom_dest->ready == 0) {
+    printf("bloom at %p not initialized!\n", (void *)bloom_dest);
+    return -1;
+  }
+
+  if (bloom_src->ready == 0) {
+    printf("bloom at %p not initialized!\n", (void *)bloom_src);
+    return -1;
+  }
+
+  if (bloom_dest->entries != bloom_src->entries) {
+    return 1;
+  }
+
+  if (bloom_dest->error != bloom_src->error) {
+    return 1;
+  }
+
+  if (bloom_dest->major != bloom_src->major) {
+    return 1;
+  }
+
+  if (bloom_dest->minor != bloom_src->minor) {
+    return 1;
+  }
+
+  // Not really possible if properly used but check anyway to avoid the
+  // possibility of buffer overruns.
+  if (bloom_dest->bytes != bloom_src->bytes) {
+    return 1;                                                // LCOV_EXCL_LINE
+  }
+
+  for (unsigned int p = 0; p < bloom_dest->bytes; p++) {
+    bloom_dest->bf[p] |= bloom_src->bf[p];
+  }
+
+  return 0;
 }
 
 
