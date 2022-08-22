@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2012-2019, Jyri J. Virkki
+ *  Copyright (c) 2012-2022, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -193,6 +193,30 @@ int bloom_save(struct bloom * bloom, char * filename);
  *
  */
 int bloom_load(struct bloom * bloom, char * filename);
+
+
+/** ***************************************************************************
+ * Merge two compatible bloom filters.
+ *
+ * On success, bloom_dest will contain all elements of bloom_src in addition
+ * to its own. The bloom_src bloom filter is never modified.
+ *
+ * Both bloom_dest and bloom_src must be initialized and both must have
+ * identical parameters.
+ *
+ * Parameters:
+ * -----------
+ *     bloom_dest - will contain the merged elements from bloom_src
+ *     bloom_src  - its elements will be merged into bloom_dest
+ *
+ * Return:
+ * -------
+ *     0 - on success
+ *     1 - incompatible bloom filters
+ *    -1 - bloom not initialized
+ *
+ */
+int bloom_merge(struct bloom * bloom_dest, struct bloom * bloom_src);
 
 
 /** ***************************************************************************

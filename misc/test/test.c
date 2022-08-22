@@ -25,6 +25,92 @@
 
 
 /** ***************************************************************************
+ * Test bloom_merge operation.
+ *
+ */
+static int merge_test(unsigned int entries, double error, int count)
+{
+  struct bloom bloom_dest;
+  struct bloom bloom_src;
+
+  printf("----- bloom_merge tests -----\n");
+
+  printf("Testing invalid filter combinations for merge\n");
+
+  assert(bloom_init2(&bloom_dest, entries, error) == 0);
+  assert(bloom_init2(&bloom_src, entries - 1, error) == 0);
+  assert(bloom_merge(&bloom_dest, &bloom_src) == 1);
+  bloom_free(&bloom_dest);
+  bloom_free(&bloom_src);
+
+  assert(bloom_init2(&bloom_dest, entries, error) == 0);
+  assert(bloom_init2(&bloom_src, entries, error / 2) == 0);
+  assert(bloom_merge(&bloom_dest, &bloom_src) == 1);
+  bloom_free(&bloom_dest);
+  bloom_free(&bloom_src);
+
+  assert(bloom_init2(&bloom_dest, entries, error) == 0);
+  assert(bloom_merge(&bloom_dest, &bloom_src) == -1);
+  assert(bloom_merge(&bloom_src, &bloom_dest) == -1);
+  bloom_free(&bloom_dest);
+
+  assert(bloom_init2(&bloom_dest, entries, error) == 0);
+  assert(bloom_init2(&bloom_src, entries, error) == 0);
+  bloom_dest.major = 99;
+  assert(bloom_merge(&bloom_dest, &bloom_src) == 1);
+  bloom_src.major = 99;
+  bloom_src.minor = 99;
+  assert(bloom_merge(&bloom_dest, &bloom_src) == 1);
+  bloom_free(&bloom_dest);
+  bloom_free(&bloom_src);
+
+  printf("Merging two filters with %u entries, %f error, %d count\n",
+         entries, error, count);
+
+  assert(bloom_init2(&bloom_dest, entries, error) == 0);
+  assert(bloom_init2(&bloom_src, entries, error) == 0);
+
+  int collisions = 0;
+  uint64_t n, initial;
+  int fd = open("/dev/urandom", O_RDONLY);
+  read(fd, &n, sizeof(uint64_t));
+  close(fd);
+  initial = n;
+
+  // Populate bloom_src with `count` elements
+  for (uint64_t c = 0; c < count; c++) {
+    collisions += bloom_add(&bloom_src, &n, sizeof(uint64_t));
+    n++;
+  }
+  printf("%d collisions adding to bloom_src\n", collisions);
+
+  // Also populate bloom_dest with `count` elements
+  collisions = 0;
+  for (uint64_t c = 0; c < count; c++) {
+    bloom_add(&bloom_dest, &n, sizeof(uint64_t));
+    n++;
+  }
+  printf("%d collisions adding to bloom_dest\n", collisions);
+
+  assert(bloom_merge(&bloom_dest, &bloom_src) == 0);
+
+  // Verify all elements now in bloom_dest
+  int rv;
+  n = initial;
+  for (uint64_t c = 0; c < count * 2; c++) {
+    rv = bloom_check(&bloom_dest, &n, sizeof(uint64_t));
+    assert(rv == 1);
+    n++;
+  }
+
+  bloom_free(&bloom_dest);
+  bloom_free(&bloom_src);
+
+  return 0;
+}
+
+
+/** ***************************************************************************
  * Testing bloom_load with various failure cases.
  *
  */
@@ -138,13 +224,16 @@ static int basic()
 
   load_tests();
 
+  merge_test(100000, 0.001, 500);
+
+
   return 0;
 }
 
 
 /** ***************************************************************************
  * Create a bloom filter with given parameters and add 'count' random elements
- * into it to see if collission rates are within expectations.
+ * into it to see if collision rates are within expectations.
  *
  */
 static int add_random(unsigned int entries, double error, int count,
