@@ -12,6 +12,7 @@
 	    fields directly is not impacted by the change.
 	* Added bloom_save() and bloom_load()
 	* Added bloom_merge()
+	* Fix bitfield size computation when number of elements is large.
 	* Deprecated bloom_init(). Please migrate to bloom_init2().
 	  - bloom_init() will not be removed until at least v3.0
 	    so existing code will continue to work as-is. But to take
