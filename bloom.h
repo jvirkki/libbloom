@@ -25,8 +25,8 @@ struct bloom
   // Client code may read these values if desired. Client code MUST NOT
   // modify any of these.
   unsigned int entries;
-  unsigned int bits;
-  unsigned int bytes;
+  unsigned long int bits;
+  unsigned long int bytes;
   unsigned char hashes;
   double error;
 
