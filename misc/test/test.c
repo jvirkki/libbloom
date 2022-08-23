@@ -258,6 +258,11 @@ static int basic()
 
   bits();
 
+  struct bloom null_bloom = NULL_BLOOM_FILTER;
+  bloom_print(&null_bloom);
+  assert(bloom_reset(&null_bloom) == 1);
+  bloom_free(&null_bloom);
+
   return 0;
 }
 
