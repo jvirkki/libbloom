@@ -101,7 +101,7 @@ int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
 
   long double dentries = (long double)entries;
   long double allbits = dentries * bloom->bpe;
-  bloom->bits = (unsigned int)allbits;
+  bloom->bits = (unsigned long int)allbits;
 
   if (bloom->bits % 8) {
     bloom->bytes = (bloom->bits / 8) + 1;
@@ -144,9 +144,9 @@ void bloom_print(struct bloom * bloom)
   printf(" ->version = %d.%d\n", bloom->major, bloom->minor);
   printf(" ->entries = %u\n", bloom->entries);
   printf(" ->error = %f\n", bloom->error);
-  printf(" ->bits = %u\n", bloom->bits);
+  printf(" ->bits = %lu\n", bloom->bits);
   printf(" ->bits per elem = %f\n", bloom->bpe);
-  printf(" ->bytes = %u", bloom->bytes);
+  printf(" ->bytes = %lu", bloom->bytes);
   unsigned int KB = bloom->bytes / 1024;
   unsigned int MB = KB / 1024;
   printf(" (%u KB, %u MB)\n", KB, MB);

@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,11 +25,42 @@
 #endif
 
 
+
+/** ***************************************************************************
+ * Sanity check bits & bytes
+ *
+ */
+static void bits()
+{
+  struct bloom bloom;
+  unsigned int entries;
+  unsigned long long int bytes, bits, prevbytes = 0;
+
+  printf("----- bits and bytes sanity tests -----\n");
+
+  for (entries = UINT_MAX; entries > 1000; entries = entries / 2) {
+    assert(bloom_init2(&bloom, entries, 0.001) == 0);
+
+    bytes = bloom.bytes;
+    bits = bloom.bits;
+    bloom_free(&bloom);
+
+    printf("entries = %10u (bytes = %12llu, bits = %12llu)\n",
+           entries, bytes, bits);
+
+    if (prevbytes > 0) {
+      assert(bytes < prevbytes);
+    }
+    prevbytes = bytes;
+  }
+}
+
+
 /** ***************************************************************************
  * Test bloom_merge operation.
  *
  */
-static int merge_test(unsigned int entries, double error, int count)
+static void merge_test(unsigned int entries, double error, int count)
 {
   struct bloom bloom_dest;
   struct bloom bloom_src;
@@ -105,8 +137,6 @@ static int merge_test(unsigned int entries, double error, int count)
 
   bloom_free(&bloom_dest);
   bloom_free(&bloom_src);
-
-  return 0;
 }
 
 
@@ -226,6 +256,7 @@ static int basic()
 
   merge_test(100000, 0.001, 500);
 
+  bits();
 
   return 0;
 }
@@ -283,10 +314,10 @@ static int add_random(unsigned int entries, double error, int count,
 
   if (!quiet) {
     printf("entries: %u, error: %f, count: %d, coll: %d, error: %f, "
-           "bytes: %u\n",
+           "bytes: %lu\n",
            entries, error, count, collisions, er, bloom.bytes);
   } else {
-    printf("%u %f %d %d %f %u\n",
+    printf("%u %f %d %d %f %lu\n",
            entries, error, count, collisions, er, bloom.bytes);
   }
 
@@ -343,7 +374,7 @@ static int perf_loop(int entries, int count)
   printf("Added %d elements of size %d, took %d ms (collisions=%d)\n",
          count, (int)sizeof(int), (int)(after - before), collisions);
 
-  printf("%d,%u,%ld\n", entries, bloom.bytes, after - before);
+  printf("%d,%lu,%ld\n", entries, bloom.bytes, after - before);
 
   bloom_print(&bloom);
   bloom_free(&bloom);
