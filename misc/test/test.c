@@ -110,7 +110,8 @@ static void merge_test(unsigned int entries, double error, int count)
   initial = n;
 
   // Populate bloom_src with `count` elements
-  for (uint64_t c = 0; c < count; c++) {
+  uint64_t c;
+  for (c = 0; c < count; c++) {
     collisions += bloom_add(&bloom_src, &n, sizeof(uint64_t));
     n++;
   }
@@ -118,7 +119,7 @@ static void merge_test(unsigned int entries, double error, int count)
 
   // Also populate bloom_dest with `count` elements
   collisions = 0;
-  for (uint64_t c = 0; c < count; c++) {
+  for (c = 0; c < count; c++) {
     bloom_add(&bloom_dest, &n, sizeof(uint64_t));
     n++;
   }
@@ -129,7 +130,7 @@ static void merge_test(unsigned int entries, double error, int count)
   // Verify all elements now in bloom_dest
   int rv;
   n = initial;
-  for (uint64_t c = 0; c < count * 2; c++) {
+  for (c = 0; c < count * 2; c++) {
     rv = bloom_check(&bloom_dest, &n, sizeof(uint64_t));
     assert(rv == 1);
     n++;

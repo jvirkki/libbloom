@@ -310,7 +310,8 @@ int bloom_merge(struct bloom * bloom_dest, struct bloom * bloom_src)
     return 1;                                                // LCOV_EXCL_LINE
   }
 
-  for (unsigned long int p = 0; p < bloom_dest->bytes; p++) {
+  unsigned long int p;
+  for (p = 0; p < bloom_dest->bytes; p++) {
     bloom_dest->bf[p] |= bloom_src->bf[p];
   }
 

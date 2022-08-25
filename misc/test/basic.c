@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2016-2017, Jyri J. Virkki
+ *  Copyright (c) 2016-2022, Jyri J. Virkki
  *  All rights reserved.
  *
  *  This file is under BSD license. See LICENSE file.
@@ -55,4 +55,5 @@ int main(int argc, char **argv)
   assert(bloom_check(&bloom, "hello", 5) == 1);
   bloom_free(&bloom);
   printf("----- DONE Basic tests with static library -----\n");
+  return 0;
 }
