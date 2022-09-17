@@ -88,7 +88,7 @@ int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
 {
   if (sizeof(unsigned long int) < 8) {
     printf("error: libbloom will not function correctly because\n");
-    printf("sizeof(unsigned long int) == %d\n", sizeof(unsigned long int));
+    printf("sizeof(unsigned long int) == %ld\n", sizeof(unsigned long int));
     exit(1);
   }
 
