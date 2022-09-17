@@ -15,6 +15,10 @@ extern "C" {
 
 #define NULL_BLOOM_FILTER { 0, 0, 0, 0, 0.0, 0, 0, 0, 0.0, NULL }
 
+#define ENTRIES_T unsigned int
+#define BYTES_T unsigned long int
+#define BITS_T unsigned long int
+
 
 /** ***************************************************************************
  * Structure to keep track of one bloom filter.  Caller needs to
