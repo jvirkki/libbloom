@@ -28,11 +28,11 @@
 #define BLOOM_MAGIC "libbloom2"
 
 inline static int test_bit_set_bit(unsigned char * buf,
-                                   unsigned int bit, int set_bit)
+                                   unsigned long int bit, int set_bit)
 {
-  unsigned int byte = bit >> 3;
+  unsigned long int byte = bit >> 3;
   unsigned char c = buf[byte];        // expensive memory access
-  unsigned char mask = 1 << (bit % 8);
+  unsigned char mask = 1 << (bit % 8ul);
 
   if (c & mask) {
     return 1;
@@ -56,8 +56,8 @@ static int bloom_check_add(struct bloom * bloom,
   unsigned char hits = 0;
   unsigned int a = murmurhash2(buffer, len, 0x9747b28c);
   unsigned int b = murmurhash2(buffer, len, a);
-  unsigned int x;
-  unsigned char i;
+  unsigned long int x;
+  unsigned long int i;
 
   for (i = 0; i < bloom->hashes; i++) {
     x = (a + b*i) % bloom->bits;
@@ -86,6 +86,12 @@ int bloom_init(struct bloom * bloom, int entries, double error)
 
 int bloom_init2(struct bloom * bloom, unsigned int entries, double error)
 {
+  if (sizeof(unsigned long int) < 8) {
+    printf("error: libbloom will not function correctly because\n");
+    printf("sizeof(unsigned long int) == %d\n", sizeof(unsigned long int));
+    exit(1);
+  }
+
   memset(bloom, 0, sizeof(struct bloom));
 
   if (entries < 1000 || error <= 0 || error >= 1) {
