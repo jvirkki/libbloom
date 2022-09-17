@@ -109,6 +109,10 @@ $(BINDIR)/test-basic: $(TESTDIR)/basic.c $(BINDIR)/libbloom.a
 	$(CC) $(CFLAGS) $(OPT) $(INC) $(TESTDIR)/basic.c \
 	    $(BINDIR)/libbloom.a $(LIB) -o $(BINDIR)/test-basic
 
+$(BINDIR)/visualize: $(TESTDIR)/visualize.c $(BINDIR)/libbloom.a
+	$(CC) $(CFLAGS) $(OPT) $(INC) $(TESTDIR)/visualize.c \
+	    $(BINDIR)/libbloom.a $(LIB) -lgd -o $(BINDIR)/visualize
+
 $(BINDIR)/%.o: %.c
 	mkdir -p $(BINDIR)
 	$(CC) $(CFLAGS) $(OPT) $(INC) -c $< -o $@
@@ -127,6 +131,13 @@ test: $(BINDIR)/test-libbloom $(BINDIR)/test-basic
 
 perf: $(BINDIR)/test-perf
 	$(BINDIR)/test-perf
+
+#
+# Builds the visualize program into $BINDIR
+# This is not built by default as it requires the GD library
+# (on Debian: libgd3 and libgd-dev) to be present.
+#
+visualize: $(BINDIR)/visualize
 
 vtest: $(BINDIR)/test-libbloom
 	valgrind --tool=memcheck --leak-check=full --show-reachable=yes \
