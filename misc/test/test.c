@@ -39,7 +39,7 @@ static void bits()
   printf("----- bits and bytes sanity tests -----\n");
 
   for (entries = UINT_MAX; entries > 1000; entries = entries / 2) {
-    assert(bloom_init2(&bloom, entries, 0.001) == 0);
+    assert(bloom_init2(&bloom, entries, 0.01) == 0);
 
     bytes = bloom.bytes;
     bits = bloom.bits;
