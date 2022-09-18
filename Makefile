@@ -19,7 +19,7 @@
 #
 
 BLOOM_VERSION_MAJOR=2
-BLOOM_VERSION_MINOR=0
+BLOOM_VERSION_MINOR=1
 
 #
 # Shared library names - these definitions work on most platforms but can
